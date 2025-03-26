@@ -43,24 +43,25 @@ public class HotelBookingUI {
 
         // Navigation Panel
         System.out.println("Setting up navigation panel...");
-        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setPreferredSize(new Dimension(1200, 80));
 
-        JLabel fbIcon = new JLabel(new ImageIcon("path/to/facebook.jpg"));
-        JLabel ytIcon = new JLabel(new ImageIcon("path/to/youtube.jpg"));
-        JLabel tiktokIcon = new JLabel(new ImageIcon("path/to/tiktok.jpg"));
-        JLabel logoLabel = new JLabel(new ImageIcon("D:/KhachSan/tải xuống.jpg"));
+        JPanel socialPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
+        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
+        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
 
-        navPanel.add(fbIcon);
-        navPanel.add(ytIcon);
-        navPanel.add(tiktokIcon);
-        navPanel.add(logoLabel);
+        JLabel logoLabel = createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 120, 60);
+        JPanel logoPanel = new JPanel(new BorderLayout());
+        logoPanel.add(logoLabel, BorderLayout.CENTER);
 
+        navPanel.add(socialPanel, BorderLayout.WEST);
+        navPanel.add(logoPanel, BorderLayout.CENTER);
         mainPanel.add(navPanel);
 
         // Banner Panel
         System.out.println("Setting up banner panel...");
-        JPanel bannerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        JPanel bannerPanel = new JPanel(new GridLayout(1, 2, 20, 0));
         bannerPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 500, 250));
         bannerPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 500, 250));
         mainPanel.add(bannerPanel);
@@ -69,8 +70,8 @@ public class HotelBookingUI {
         System.out.println("Setting up search panel...");
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        JTextField searchField = new JTextField(60);
-        searchField.setPreferredSize(new Dimension(700, 40));
+        JTextField searchField = new JTextField(40);
+        searchField.setPreferredSize(new Dimension(500, 40));
         JButton searchButton = new JButton("Tìm kiếm");
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
@@ -83,17 +84,17 @@ public class HotelBookingUI {
         JButton menuButton = new RoundedButton("Menu");
         menuButton.setBackground(Color.GRAY);
         menuButton.setForeground(Color.WHITE);
-        menuButton.setPreferredSize(new Dimension(150, 50));
+        menuButton.setPreferredSize(new Dimension(120, 40));
 
         JButton bookButton = new RoundedButton("Đặt phòng");
         bookButton.setBackground(new Color(240, 194, 57));
         bookButton.setForeground(Color.WHITE);
-        bookButton.setPreferredSize(new Dimension(200, 70));
+        bookButton.setPreferredSize(new Dimension(150, 50));
 
         JButton bookingButton = new RoundedButton("Booking");
         bookingButton.setBackground(Color.GRAY);
         bookingButton.setForeground(Color.WHITE);
-        bookingButton.setPreferredSize(new Dimension(150, 50));
+        bookingButton.setPreferredSize(new Dimension(120, 40));
 
         buttonPanel.add(menuButton);
         buttonPanel.add(bookButton);
@@ -102,20 +103,16 @@ public class HotelBookingUI {
 
         // Hotel Listing Panel
         System.out.println("Setting up hotel listing panel...");
-        JPanel hotelPanel = new JPanel();
-        hotelPanel.setLayout(new GridLayout(0, 1, 0, 20));
+        JPanel hotelPanel = new JPanel(new GridLayout(0, 1, 0, 20));
         hotelPanel.setBorder(BorderFactory.createEmptyBorder(20, 150, 20, 150));
 
         for (int i = 1; i <= 2; i++) {
-            System.out.println("Adding hotel item " + i);
             JPanel hotelItem = new JPanel(new BorderLayout(20, 0));
             JLabel hotelImage = createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 450, 320);
             JPanel hotelInfo = new JPanel();
             hotelInfo.setLayout(new BoxLayout(hotelInfo, BoxLayout.Y_AXIS));
             JLabel hotelName = new JLabel("Hotel Name " + i);
             JLabel hotelPrice = new JLabel("2,000,000 đ / night");
-            hotelName.setFont(new Font("Arial", Font.BOLD, 20));
-            hotelPrice.setFont(new Font("Arial", Font.PLAIN, 18));
             hotelInfo.add(hotelName);
             hotelInfo.add(hotelPrice);
             hotelItem.add(hotelImage, BorderLayout.WEST);
@@ -124,33 +121,17 @@ public class HotelBookingUI {
         }
         mainPanel.add(hotelPanel);
 
-        // Panel Dịch vụ - Ưu đãi - Combo
+        // Service Panel
         System.out.println("Setting up service panel...");
         JPanel servicePanel = new JPanel(new GridLayout(2, 3, 10, 10));
         servicePanel.setBorder(BorderFactory.createEmptyBorder(30, 100, 30, 100));
 
-        JLabel serviceLabel = new JLabel("Dịch vụ", SwingConstants.CENTER);
-        JLabel discountLabel = new JLabel("Ưu đãi", SwingConstants.CENTER);
-        JLabel comboLabel = new JLabel("Combo", SwingConstants.CENTER);
-
-        Font titleFont = new Font("Arial", Font.BOLD, 20);
-        Color lightGray = new Color(120, 120, 120);
-
-        serviceLabel.setFont(titleFont);
-        serviceLabel.setForeground(lightGray);
-        discountLabel.setFont(titleFont);
-        discountLabel.setForeground(lightGray);
-        comboLabel.setFont(titleFont);
-        comboLabel.setForeground(lightGray);
-
-        servicePanel.add(serviceLabel);
-        servicePanel.add(discountLabel);
-        servicePanel.add(comboLabel);
-
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 200, 150));
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 200, 150));
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 200, 150));
-
+        servicePanel.add(new JLabel("Dịch vụ", SwingConstants.CENTER));
+        servicePanel.add(new JLabel("Ưu đãi", SwingConstants.CENTER));
+        servicePanel.add(new JLabel("Combo", SwingConstants.CENTER));
+        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
+        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
+        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
         mainPanel.add(servicePanel);
 
         // Footer Panel
