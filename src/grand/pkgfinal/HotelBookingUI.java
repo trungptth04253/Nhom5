@@ -1,12 +1,17 @@
 package grand.pkgfinal;
 
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.io.IOException;
 
 class RoundedButton extends JButton {
     public RoundedButton(String text) {
         super(text);
         setContentAreaFilled(false);
+        setFocusPainted(false);
     }
 
     @Override
@@ -26,130 +31,317 @@ class RoundedButton extends JButton {
 }
 
 public class HotelBookingUI {
-    public static void main(String[] args) {
-        System.out.println("Initializing Hotel Booking UI...");
-        JFrame frame = new JFrame("Hotel Booking");
-        frame.setSize(1200, 800);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+public static void main(String[] args) {
+    System.out.println("Khởi động ứng dụng đặt phòng khách sạn...");
+    JFrame frame = new JFrame("Hệ Thống Đặt Phòng Khách Sạn");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setPreferredSize(new Dimension(1200, 800));
 
-        // Thêm khả năng cuộn
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    // Main panel với scroll
+    JPanel mainPanel = new JPanel();
+    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    mainPanel.setBackground(Color.WHITE);
 
-        JScrollPane scrollPane = new JScrollPane(mainPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        frame.add(scrollPane, BorderLayout.CENTER);
+    JScrollPane scrollPane = new JScrollPane(mainPanel);
+    scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Navigation Panel
-        System.out.println("Setting up navigation panel...");
+    // Thêm các thành phần vào mainPanel và TRUYỀN FRAME
+    mainPanel.add(createNavPanel(frame)); // Truyền frame vào createNavPanel
+    mainPanel.add(createBannerSection());
+    mainPanel.add(createSearchSection());
+    mainPanel.add(createHotelListings());
+    mainPanel.add(createServiceSection());
+    mainPanel.add(createFooter());
+
+    frame.pack();
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
+}
+
+    // ========== CÁC PHƯƠNG THỨC TẠO COMPONENT ==========
+    private static JPanel createNavPanel(JFrame mainFrame) {
         JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setPreferredSize(new Dimension(1200, 80));
+        navPanel.setBackground(new Color(240, 240, 240));
 
-        JPanel socialPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
-        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
-        socialPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 30, 30));
+        // ===== PHẦN SOCIAL ICONS (TRÁI) =====
+        JPanel socialPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
+        socialPanel.setBackground(new Color(240, 240, 240));
 
-        JLabel logoLabel = createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 120, 60);
-        JPanel logoPanel = new JPanel(new BorderLayout());
-        logoPanel.add(logoLabel, BorderLayout.CENTER);
+        // Thêm các icon mạng xã hội
+        socialPanel.add(createIconLabel("/facebook.png", 30, 30));
+        socialPanel.add(Box.createHorizontalStrut(10));
+        socialPanel.add(createIconLabel("/twitter.png", 30, 30));
+        socialPanel.add(Box.createHorizontalStrut(10));
+        socialPanel.add(createIconLabel("/instagram.png", 30, 30));
 
+        // ===== PHẦN LOGO (GIỮA) =====
+        JLabel logoLabel = createIconLabel("/logo.png", 200, 50);
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        logoPanel.setBackground(new Color(240, 240, 240));
+        logoPanel.add(logoLabel);
+
+        // ===== PHẦN ĐĂNG NHẬP/ĐĂNG KÝ (PHẢI) =====
+        JPanel authPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
+        authPanel.setBackground(new Color(240, 240, 240));
+
+        // ===== GẮN CÁC PHẦN VÀO NAV PANEL =====
         navPanel.add(socialPanel, BorderLayout.WEST);
         navPanel.add(logoPanel, BorderLayout.CENTER);
-        mainPanel.add(navPanel);
+        navPanel.add(authPanel, BorderLayout.EAST);
 
-        // Banner Panel
-        System.out.println("Setting up banner panel...");
-        JPanel bannerPanel = new JPanel(new GridLayout(1, 2, 20, 0));
-        bannerPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 500, 250));
-        bannerPanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 500, 250));
-        mainPanel.add(bannerPanel);
-
-        // Search Panel
-        System.out.println("Setting up search panel...");
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        JTextField searchField = new JTextField(40);
-        searchField.setPreferredSize(new Dimension(500, 40));
-        JButton searchButton = new JButton("Tìm kiếm");
-        searchPanel.add(searchField);
-        searchPanel.add(searchButton);
-        mainPanel.add(searchPanel);
-
-        // Button Panel
-        System.out.println("Setting up button panel...");
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        JButton menuButton = new RoundedButton("Menu");
-        menuButton.setBackground(Color.GRAY);
-        menuButton.setForeground(Color.WHITE);
-        menuButton.setPreferredSize(new Dimension(120, 40));
-
-        JButton bookButton = new RoundedButton("Đặt phòng");
-        bookButton.setBackground(new Color(240, 194, 57));
-        bookButton.setForeground(Color.WHITE);
-        bookButton.setPreferredSize(new Dimension(150, 50));
-
-        JButton bookingButton = new RoundedButton("Booking");
-        bookingButton.setBackground(Color.GRAY);
-        bookingButton.setForeground(Color.WHITE);
-        bookingButton.setPreferredSize(new Dimension(120, 40));
-
-        buttonPanel.add(menuButton);
-        buttonPanel.add(bookButton);
-        buttonPanel.add(bookingButton);
-        mainPanel.add(buttonPanel);
-
-        // Hotel Listing Panel
-        System.out.println("Setting up hotel listing panel...");
-        JPanel hotelPanel = new JPanel(new GridLayout(0, 1, 0, 20));
-        hotelPanel.setBorder(BorderFactory.createEmptyBorder(20, 150, 20, 150));
-
-        for (int i = 1; i <= 2; i++) {
-            JPanel hotelItem = new JPanel(new BorderLayout(20, 0));
-            JLabel hotelImage = createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 450, 320);
-            JPanel hotelInfo = new JPanel();
-            hotelInfo.setLayout(new BoxLayout(hotelInfo, BoxLayout.Y_AXIS));
-            JLabel hotelName = new JLabel("Hotel Name " + i);
-            JLabel hotelPrice = new JLabel("2,000,000 đ / night");
-            hotelInfo.add(hotelName);
-            hotelInfo.add(hotelPrice);
-            hotelItem.add(hotelImage, BorderLayout.WEST);
-            hotelItem.add(hotelInfo, BorderLayout.CENTER);
-            hotelPanel.add(hotelItem);
-        }
-        mainPanel.add(hotelPanel);
-
-        // Service Panel
-        System.out.println("Setting up service panel...");
-        JPanel servicePanel = new JPanel(new GridLayout(2, 3, 10, 10));
-        servicePanel.setBorder(BorderFactory.createEmptyBorder(30, 100, 30, 100));
-
-        servicePanel.add(new JLabel("Dịch vụ", SwingConstants.CENTER));
-        servicePanel.add(new JLabel("Ưu đãi", SwingConstants.CENTER));
-        servicePanel.add(new JLabel("Combo", SwingConstants.CENTER));
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
-        servicePanel.add(createResizedImageLabel("D:/KhachSan/tải xuống.jpg", 350, 400));
-        mainPanel.add(servicePanel);
-
-        // Footer Panel
-        System.out.println("Setting up footer panel...");
-        JPanel footerPanel = new JPanel();
-        footerPanel.setBackground(new Color(200, 200, 200));
-        footerPanel.setPreferredSize(new Dimension(1200, 100));
-        JLabel footerLabel = new JLabel("Thông tin liên hệ - Điều khoản sử dụng - Chính sách bảo mật", SwingConstants.CENTER);
-        footerPanel.add(footerLabel);
-        mainPanel.add(footerPanel);
-
-        System.out.println("Finalizing UI setup...");
-        frame.setVisible(true);
+        return navPanel;
     }
 
-    private static JLabel createResizedImageLabel(String path, int width, int height) {
-        ImageIcon icon = new ImageIcon(path);
-        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new JLabel(new ImageIcon(img));
+    private static JPanel createBannerSection() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 15, 0));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+        
+        panel.add(createBannerCard("/banner1.jpg", "Ưu đãi mùa hè", "Giảm đến 40%"));
+        panel.add(createBannerCard("/banner2.jpg", "Trải nghiệm sang trọng", "Phòng Suite VIP"));
+        
+        return panel;
+    }
+
+    private static JPanel createBannerCard(String imgPath, String title, String subtitle) {
+        JPanel card = new JPanel(new BorderLayout());
+        JLabel imgLabel = createIconLabel(imgPath, 500, 250);
+        
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setOpaque(false);
+        textPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+        
+        JLabel subLabel = new JLabel(subtitle);
+        subLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        subLabel.setForeground(Color.WHITE);
+        
+        textPanel.add(Box.createVerticalGlue());
+        textPanel.add(titleLabel);
+        textPanel.add(subLabel);
+        
+        card.add(imgLabel, BorderLayout.CENTER);
+        card.add(textPanel, BorderLayout.SOUTH);
+        return card;
+    }
+
+    private static JPanel createSearchSection() {
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        
+        JTextField searchField = new JTextField(30);
+        searchField.setPreferredSize(new Dimension(500, 45));
+        searchField.setFont(new Font("Arial", Font.PLAIN, 16));
+        
+        RoundedButton searchButton = new RoundedButton("TÌM KIẾM");
+        customizeButton(searchButton, new Color(0, 120, 215));
+        searchButton.addActionListener(e -> 
+            JOptionPane.showMessageDialog(null, "Đang tìm kiếm: " + searchField.getText())
+        );
+        
+        panel.add(searchField);
+        panel.add(Box.createHorizontalStrut(10));
+        panel.add(searchButton);
+        return panel;
+    }
+
+    private static JPanel createActionButtons() {
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
+        
+        RoundedButton btnMenu = new RoundedButton("MENU");
+        customizeButton(btnMenu, Color.GRAY);
+        
+        RoundedButton btnBook = new RoundedButton("ĐẶT PHÒNG");
+        customizeButton(btnBook, new Color(240, 194, 57));
+        btnBook.addActionListener(e -> showBookingDialog(null));
+        
+        RoundedButton btnMyBooking = new RoundedButton("MY BOOKING");
+        customizeButton(btnMyBooking, Color.GRAY);
+        
+        panel.add(btnMenu);
+        panel.add(Box.createHorizontalStrut(15));
+        panel.add(btnBook);
+        panel.add(Box.createHorizontalStrut(15));
+        panel.add(btnMyBooking);
+        return panel;
+    }
+
+    private static JPanel createHotelListings() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 150, 40, 150));
+        
+        for (int i = 1; i <= 2; i++) {
+            panel.add(createHotelItem(
+                "Khách sạn " + (i == 1 ? "Hilton" : "Vinpearl"), 
+                (i == 1 ? "2,500,000" : "3,200,000") + " VND/đêm",
+                "/hotel" + i + ".jpg"
+            ));
+            panel.add(Box.createVerticalStrut(20));
+        }
+        return panel;
+    }
+
+    private static JPanel createHotelItem(String name, String price, String imgPath) {
+        JPanel panel = new JPanel(new BorderLayout(20, 0));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15))
+        );
+        
+        JLabel imgLabel = createIconLabel(imgPath, 350, 200);
+        panel.add(imgLabel, BorderLayout.WEST);
+        
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        
+        JLabel nameLabel = new JLabel(name);
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        
+        JLabel priceLabel = new JLabel(price);
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        priceLabel.setForeground(new Color(240, 194, 57));
+        
+        JTextArea desc = new JTextArea("Phòng rộng rãi với đầy đủ tiện nghi, view đẹp");
+        desc.setLineWrap(true);
+        desc.setEditable(false);
+        desc.setBackground(null);
+        
+        RoundedButton bookBtn = new RoundedButton("ĐẶT NGAY");
+        customizeButton(bookBtn, new Color(50, 168, 82));
+        
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createVerticalStrut(10));
+        infoPanel.add(priceLabel);
+        infoPanel.add(Box.createVerticalStrut(15));
+        infoPanel.add(desc);
+        infoPanel.add(Box.createVerticalStrut(20));
+        infoPanel.add(bookBtn);
+        
+        panel.add(infoPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private static JPanel createServiceSection() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 50, 50));
+        panel.setBackground(new Color(248, 248, 248));
+        
+        JLabel title = new JLabel("DỊCH VỤ & ƯU ĐÃI", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 28));
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+        
+        JPanel grid = new JPanel(new GridLayout(1, 3, 20, 20));
+        grid.setMaximumSize(new Dimension(1000, 400));
+        
+        grid.add(createServiceCard("/spa.jpg", "Dịch vụ Spa", "Massage thư giãn"));
+        grid.add(createServiceCard("/promo.jpg", "Ưu đãi", "Giảm giá 30%"));
+        grid.add(createServiceCard("/combo.jpg", "Combo", "Phòng + Ăn sáng"));
+        
+        panel.add(grid);
+        return panel;
+    }
+
+    private static JPanel createServiceCard(String imgPath, String title, String desc) {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(180, 180, 180)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15))
+        );
+        
+        JLabel imgLabel = createIconLabel(imgPath, 280, 160);
+        imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(imgLabel);
+        card.add(Box.createVerticalStrut(15));
+        
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        card.add(titleLabel);
+        card.add(Box.createVerticalStrut(10));
+        
+        JLabel descLabel = new JLabel(desc, SwingConstants.CENTER);
+        card.add(descLabel);
+        
+        return card;
+    }
+
+    private static JPanel createFooter() {
+        JPanel panel = new JPanel();
+        panel.setBackground(new Color(50, 50, 50));
+        panel.setPreferredSize(new Dimension(1200, 100));
+        
+        JLabel label = new JLabel(
+            "<html><center><font color='white'>HOTEL BOOKING SYSTEM</font><br>" +
+            "<font color='silver'>Địa chỉ: 123 Nguyễn Huệ, TP.HCM | Hotline: 1900 1234</font></center></html>"
+        );
+        panel.add(label);
+        return panel;
+    }
+
+    // ========== TIỆN ÍCH ==========
+    private static JLabel createIconLabel(String path, int width, int height) {
+        try (InputStream imgStream = HotelBookingUI.class.getResourceAsStream(path)) {
+            if (imgStream == null) return createErrorLabel(width, height);
+            
+            BufferedImage image = ImageIO.read(imgStream);
+            Image scaledImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new JLabel(new ImageIcon(scaledImage));
+        } catch (IOException e) {
+            return createErrorLabel(width, height);
+        }
+    }
+
+    private static JLabel createErrorLabel(int width, int height) {
+        JLabel label = new JLabel("[ẢNH LỖI]");
+        label.setPreferredSize(new Dimension(width, height));
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setForeground(Color.RED);
+        label.setBorder(BorderFactory.createLineBorder(Color.RED));
+        return label;
+    }
+
+    private static void customizeButton(JButton button, Color bgColor) {
+        button.setBackground(bgColor);
+        button.setForeground(Color.WHITE);
+        button.setPreferredSize(new Dimension(150, 50));
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+    }
+
+    private static void showBookingDialog(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Đặt phòng", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new BorderLayout());
+        
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        formPanel.add(new JLabel("Loại phòng:"));
+        formPanel.add(new JComboBox<>(new String[]{"Phòng Đơn", "Phòng Đôi", "Suite"}));
+        
+        formPanel.add(new JLabel("Ngày nhận phòng:"));
+        formPanel.add(new JTextField());
+        
+        formPanel.add(new JLabel("Ngày trả phòng:"));
+        formPanel.add(new JTextField());
+        
+        formPanel.add(new JLabel("Số lượng:"));
+        formPanel.add(new JComboBox<>(new String[]{"1", "2", "3", "4"}));
+        
+        JButton confirmButton = new JButton("Xác nhận");
+        confirmButton.addActionListener(e -> dialog.dispose());
+        
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(confirmButton, BorderLayout.SOUTH);
+        dialog.setLocationRelativeTo(parent);
+        dialog.setVisible(true);
     }
 }
