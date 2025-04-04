@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.IOException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 class RoundedButton extends JButton {
     public RoundedButton(String text) {
@@ -31,7 +33,9 @@ class RoundedButton extends JButton {
 }
 
 public class HotelBookingUI {
+private static JFrame mainFrame;
 public static void main(String[] args) {
+    
     System.out.println("Khởi động ứng dụng đặt phòng khách sạn...");
     JFrame frame = new JFrame("Hệ Thống Đặt Phòng Khách Sạn");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -57,8 +61,30 @@ public static void main(String[] args) {
     frame.pack();
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
+    mainFrame = frame;
+    
 }
 
+    public static JFrame getMainFrame() {
+        return mainFrame;
+    }
+
+    private static void openServiceFrame(String serviceType) {
+    JFrame mainFrame = HotelBookingUI.getMainFrame();
+    mainFrame.setVisible(false); // Ẩn frame chính
+    
+    switch (serviceType) {
+        case "Dịch vụ":
+            new DichVu(mainFrame).setVisible(true);
+            break;
+        case "Combo":
+            new Combo(mainFrame).setVisible(true);
+            break;
+        case "Ưu đãi":
+            new UuDai(mainFrame).setVisible(true);
+            break;
+    }
+}
     // ========== CÁC PHƯƠNG THỨC TẠO COMPONENT ==========
     private static JPanel createNavPanel(JFrame mainFrame) {
         JPanel navPanel = new JPanel(new BorderLayout());
@@ -242,7 +268,7 @@ public static void main(String[] args) {
         JPanel grid = new JPanel(new GridLayout(1, 3, 20, 20));
         grid.setMaximumSize(new Dimension(1000, 400));
         
-        grid.add(createServiceCard("/spa.jpg", "Dịch vụ Spa", "Massage thư giãn"));
+        grid.add(createServiceCard("/spa.jpg", "Dịch vụ ", "Massage thư giãn"));
         grid.add(createServiceCard("/promo.jpg", "Ưu đãi", "Giảm giá 30%"));
         grid.add(createServiceCard("/combo.jpg", "Combo", "Phòng + Ăn sáng"));
         
@@ -257,22 +283,31 @@ public static void main(String[] args) {
             BorderFactory.createLineBorder(new Color(180, 180, 180)),
             BorderFactory.createEmptyBorder(15, 15, 15, 15))
         );
-        
+
+        // Thêm sự kiện click
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                openServiceFrame(title.trim());
+            }
+        });
+
         JLabel imgLabel = createIconLabel(imgPath, 280, 160);
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(imgLabel);
         card.add(Box.createVerticalStrut(15));
-        
+
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         card.add(titleLabel);
         card.add(Box.createVerticalStrut(10));
-        
+
         JLabel descLabel = new JLabel(desc, SwingConstants.CENTER);
         card.add(descLabel);
-        
+
         return card;
     }
+
 
     private static JPanel createFooter() {
         JPanel panel = new JPanel();
@@ -288,7 +323,7 @@ public static void main(String[] args) {
     }
 
     // ========== TIỆN ÍCH ==========
-    private static JLabel createIconLabel(String path, int width, int height) {
+    static JLabel createIconLabel(String path, int width, int height) {
         try (InputStream imgStream = HotelBookingUI.class.getResourceAsStream(path)) {
             if (imgStream == null) return createErrorLabel(width, height);
             
