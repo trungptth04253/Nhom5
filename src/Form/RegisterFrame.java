@@ -18,8 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 public class RegisterFrame extends javax.swing.JFrame {
-
-    String urlImg = null;
     
     public RegisterFrame() {
         initComponents();
@@ -38,42 +36,33 @@ public class RegisterFrame extends javax.swing.JFrame {
         jRadioButton1 = new javax.swing.JRadioButton();
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        txtUserName = new javax.swing.JTextField();
-        txtEmail = new javax.swing.JTextField();
-        txtPhoneNumber = new javax.swing.JTextField();
-        txtPassword = new javax.swing.JTextField();
-        txtRePass = new javax.swing.JTextField();
-        jCheckBox1 = new javax.swing.JCheckBox();
         btnSignUp = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jCheckBox2 = new javax.swing.JCheckBox();
-        jCheckBox3 = new javax.swing.JCheckBox();
-        btnChoose = new javax.swing.JButton();
-        btnImg = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        cboNam = new javax.swing.JCheckBox();
+        jLabel4 = new javax.swing.JLabel();
+        cboNu = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        txtBirthDay = new javax.swing.JTextField();
+        txtUserName = new javax.swing.JTextField();
+        txtTuoi = new javax.swing.JTextField();
+        txtCCCD = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtPhoneNumber = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtEmail = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        txtPass = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        cboChecking = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jRadioButton1.setText("jRadioButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jLabel1.setText("Tên đăng nhập");
-
-        jLabel2.setText("Email");
-
-        jLabel3.setText("Số điện thoại");
-
-        jLabel4.setText("Mật khẩu");
-
-        jLabel5.setText("Nhập lại mật khẩu");
-
-        buttonGroup1.add(jCheckBox1);
-        jCheckBox1.setText("Xác nhận bạn là con người?");
 
         btnSignUp.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnSignUp.setForeground(new java.awt.Color(255, 51, 51));
@@ -84,175 +73,198 @@ public class RegisterFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel2.setText("Ngày Sinh");
+
+        jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel6.setText("Giới tính");
 
-        buttonGroup2.add(jCheckBox2);
-        jCheckBox2.setText("Nam");
-        jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel3.setText("Số điện thoại");
+
+        cboNam.setText("Nam");
+        cboNam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox2ActionPerformed(evt);
+                cboNamActionPerformed(evt);
             }
         });
 
-        buttonGroup2.add(jCheckBox3);
-        jCheckBox3.setText("Nữ");
-        jCheckBox3.addActionListener(new java.awt.event.ActionListener() {
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel4.setText("Email");
+
+        cboNu.setText("Nữ");
+        cboNu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox3ActionPerformed(evt);
+                cboNuActionPerformed(evt);
             }
         });
 
-        btnChoose.setText("Chọn ảnh");
-        btnChoose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnChooseActionPerformed(evt);
-            }
-        });
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel5.setText("Mật khẩu");
 
-        btnImg.setText("Ảnh");
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel7.setText("Tuổi");
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel8.setText("CCCD");
+
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(0, 0, 255));
+        jLabel9.setText("Khách Sạn REVUER");
+
+        jLabel10.setText("Đăng ký tài khoản");
+
+        cboChecking.setText("Xác nhận bạn là con người?");
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel1.setText("Tên đăng nhập");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(41, 41, 41)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4))
-                        .addGap(30, 30, 30)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtUserName)
-                            .addComponent(txtEmail)
-                            .addComponent(txtPhoneNumber)
-                            .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnSignUp)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jCheckBox1)
-                            .addComponent(txtRePass, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE))))
+                .addGap(62, 62, 62)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
-                        .addComponent(btnChoose)
-                        .addGap(120, 120, 120))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addGap(36, 36, 36)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboChecking)
+                    .addComponent(txtPhoneNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtBirthDay, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTuoi, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(52, 52, 52)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jCheckBox2)
-                                .addGap(51, 51, 51)
-                                .addComponent(jCheckBox3))
-                            .addComponent(btnImg, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(cboNam)
+                        .addGap(35, 35, 35)
+                        .addComponent(cboNu)))
+                .addContainerGap(79, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel9)
+                .addGap(196, 196, 196))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnSignUp)
+                .addGap(221, 221, 221))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(27, 27, 27)
-                        .addComponent(jLabel6)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(22, 22, 22)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(txtPhoneNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(26, 26, 26)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(26, 26, 26)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtRePass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(btnImg, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addComponent(jCheckBox1)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSignUp))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jCheckBox3)
-                            .addComponent(jCheckBox2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnChoose)))
-                .addContainerGap(22, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(16, 16, 16)
+                                        .addComponent(jLabel9))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(jLabel10)))
+                                .addGap(18, 18, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel1))
+                                .addGap(22, 22, 22)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtBirthDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2))
+                                .addGap(26, 26, 26)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtTuoi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel7))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(cboNu)
+                                    .addComponent(cboNam)
+                                    .addComponent(jLabel6))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel8))
+                                .addGap(29, 29, 29)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtPhoneNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3))
+                                .addGap(27, 27, 27)
+                                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel4)))
+                        .addGap(28, 28, 28)
+                        .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel5)))
+                .addGap(34, 34, 34)
+                .addComponent(cboChecking)
+                .addGap(38, 38, 38)
+                .addComponent(btnSignUp)
+                .addGap(19, 19, 19))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jCheckBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox2ActionPerformed
-
-    private void jCheckBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox3ActionPerformed
-
     private void btnSignUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignUpActionPerformed
         String username = txtUserName.getText().trim();
-        String email = txtEmail.getText().trim();
+        String birthday = txtBirthDay.getText().trim();
+        String age = txtTuoi.getText().trim();
+        String gender;
+        if (cboNam.isSelected()) {
+            gender = "Nam";
+        } else {
+            gender = "Nữ";
+        }
+        String CCCD = txtCCCD.getText().trim();
         String phone = txtPhoneNumber.getText().trim();
-        String password = txtPassword.getText();
-        String rePassword = txtRePass.getText();
+        String email = txtEmail.getText();
+        String password = txtPass.getText();
+        
 
         if (username == null || username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Username không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (birthday == null || birthday.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (age == null || age.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Tuổi không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (gender == null || gender.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Giới tính không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (CCCD == null || CCCD.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Căn cước không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (phone == null || phone.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "SĐT không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (email == null || email.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Email không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (phone == null || phone.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Số điện thoại không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (password == null || password.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Mật khẩu không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (rePassword == null || rePassword.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Mật khẩu nhập lại không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (urlImg == null || urlImg.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Ảnh không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         if (password.length() <= 6) {
             JOptionPane.showMessageDialog(null, "Mật khẩu phải lớn hơn 6 ký tự.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (!password.equals(rePassword)) {
-            JOptionPane.showMessageDialog(null, "Mật khẩu nhập lại không khớp.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!phone.matches("^\\d{10}$")) {
@@ -260,7 +272,7 @@ public class RegisterFrame extends javax.swing.JFrame {
             return;
         }
 
- String connectionUrl = "jdbc:sqlserver://LAPTOP-4K0UOUJE\\MSSQLSERVER02;databaseName=QuanLyDatPhongKhachSan;user=sa;password=123;trustServerCertificate=true";
+ String connectionUrl = "jdbc:sqlserver://LAPTOP-R242TNJ3:1433;databaseName=QuanLyDatPhongKhachSan;user=sa;password=123;trustServerCertificate=true";
 
         try (Connection con = DriverManager.getConnection(connectionUrl); Statement stmt = con.createStatement();) {
            
@@ -274,7 +286,7 @@ public class RegisterFrame extends javax.swing.JFrame {
            
 
             
-            String insertSQL = "INSERT INTO account (username, password, email, phonenumber, avartar, role, status) "
+            String insertSQL = "INSERT INTO  (username, password, email, phonenumber, avartar, role, status) "
                     + "VALUES ('" + username + "', '" + password + "', '" + email + "', '"+ phone + "', '" + urlImg + "', 1, 1)";
             int rowsInserted = stmt.executeUpdate(insertSQL);
 
@@ -291,18 +303,13 @@ public class RegisterFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSignUpActionPerformed
 
-    private void btnChooseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseActionPerformed
-         JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png", "gif"));
-        int hienthi = chooser.showOpenDialog(null);
-        if (hienthi == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            urlImg = file.getAbsolutePath();
-            ImageIcon img = new ImageIcon(new ImageIcon(file.getAbsolutePath()).getImage().getScaledInstance(157, 195, Image.SCALE_SMOOTH));
-            btnImg.setIcon(img);
+    private void cboNamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboNamActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cboNamActionPerformed
 
-        }
-    }//GEN-LAST:event_btnChooseActionPerformed
+    private void cboNuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboNuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cboNuActionPerformed
 
     /**
      * @param args the command line arguments
@@ -340,26 +347,30 @@ public class RegisterFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnChoose;
-    private javax.swing.JButton btnImg;
     private javax.swing.JButton btnSignUp;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox2;
-    private javax.swing.JCheckBox jCheckBox3;
+    private javax.swing.JCheckBox cboChecking;
+    private javax.swing.JCheckBox cboNam;
+    private javax.swing.JCheckBox cboNu;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JRadioButton jRadioButton1;
+    private javax.swing.JTextField txtBirthDay;
+    private javax.swing.JTextField txtCCCD;
     private javax.swing.JTextField txtEmail;
-    private javax.swing.JTextField txtPassword;
+    private javax.swing.JTextField txtPass;
     private javax.swing.JTextField txtPhoneNumber;
-    private javax.swing.JTextField txtRePass;
+    private javax.swing.JTextField txtTuoi;
     private javax.swing.JTextField txtUserName;
     // End of variables declaration//GEN-END:variables
 }
