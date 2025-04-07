@@ -8,6 +8,11 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 class RoundedButton extends JButton {
     public RoundedButton(String text) {
@@ -33,6 +38,16 @@ class RoundedButton extends JButton {
 }
 
 public class HotelBookingUI {
+    static {
+    try {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    } catch (ClassNotFoundException e) {
+        JOptionPane.showMessageDialog(null,
+            "Lỗi tải driver CSDL: " + e.getMessage(),
+            "Lỗi",
+            JOptionPane.ERROR_MESSAGE);
+    }
+}
 private static JFrame mainFrame;
 public static void main(String[] args) {
     
@@ -53,6 +68,7 @@ public static void main(String[] args) {
     // Thêm các thành phần vào mainPanel và TRUYỀN FRAME
     mainPanel.add(createNavPanel(frame)); // Truyền frame vào createNavPanel
     mainPanel.add(createBannerSection());
+    mainPanel.add(createActionButtons());
     mainPanel.add(createSearchSection());
     mainPanel.add(createHotelListings());
     mainPanel.add(createServiceSection());
@@ -202,24 +218,45 @@ public static void main(String[] args) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 150, 40, 150));
-        
-        for (int i = 1; i <= 2; i++) {
-            panel.add(createHotelItem(
-                "Khách sạn " + (i == 1 ? "Hilton" : "Vinpearl"), 
-                (i == 1 ? "2,500,000" : "3,200,000") + " VND/đêm",
-                "/hotel" + i + ".jpg"
-            ));
-            panel.add(Box.createVerticalStrut(20));
+
+        // Kết nối CSDL và lấy 2 phòng đầu tiên
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:sqlserver://KEANDANHSIEUPHA:1433;"
+                + "databaseName=SOF2042_FINAL_TEST;"
+                + "user=sa;"
+                + "password=123;"
+                + "trustServerCertificate=true");
+             PreparedStatement pstmt = conn.prepareStatement(
+                 "SELECT TOP 2 * FROM Phong WHERE ID IN (1,2) ORDER BY ID")) {
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                panel.add(createHotelItem(
+                    rs.getString("LoaiPhong"),
+                    String.format("%,.0f VND/đêm", rs.getDouble("GiaPhong")),
+                    "/hotel" + rs.getInt("ID") + ".jpg" // Giả sử ảnh đặt tên theo ID
+                ));
+                panel.add(Box.createVerticalStrut(20));
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, 
+                "Lỗi tải dữ liệu phòng: " + e.getMessage(),
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
         }
+
         return panel;
     }
+    
 
     private static JPanel createHotelItem(String name, String price, String imgPath) {
         JPanel panel = new JPanel(new BorderLayout(20, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             BorderFactory.createEmptyBorder(15, 15, 15, 15))
-        );
+    );
         
         JLabel imgLabel = createIconLabel(imgPath, 350, 200);
         panel.add(imgLabel, BorderLayout.WEST);
