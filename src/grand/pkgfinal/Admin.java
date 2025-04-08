@@ -8,6 +8,9 @@ import java.sql.*;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class Admin extends JFrame {
     private JTable table;
@@ -31,18 +34,28 @@ public class Admin extends JFrame {
 
     private void connectDB() {
         try {
-            String connectionString = 
-                "jdbc:sqlserver://KEANDANHSIEUPHA:1433;" +
-                "databaseName=SOF2042_FINAL_TEST;" +
-                "user=sa;" +
-                "password=123;" +
-                "encrypt=false;" +       // Tắt mã hóa nếu không dùng SSL
-                "trustServerCertificate=true;" + 
-                "loginTimeout=30;";
+            // Tạo file database trong thư mục project
+            String dbPath = "hotel_booking.db";
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
-            connection = DriverManager.getConnection(connectionString);
+            // Tạo bảng nếu chưa tồn tại
+            createTablesIfNotExist();
         } catch (SQLException e) {
-            showError("Lỗi kết nối: " + e.getSQLState() + " | " + e.getMessage());
+            showError("Lỗi kết nối SQLite: " + e.getMessage());
+        }
+    }
+
+    private void createTablesIfNotExist() throws SQLException {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS Phong (" +
+            "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "SoPhong INTEGER NOT NULL, " +
+            "LoaiPhong TEXT NOT NULL, " +
+            "GiaPhong REAL NOT NULL, " +
+            "TrangThai TEXT NOT NULL, " +
+            "HinhAnh TEXT)";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
         }
     }
 
@@ -192,16 +205,33 @@ public class Admin extends JFrame {
         }
     }
 
-    private void selectImage() {
-        JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Ảnh phòng (*.jpg, *.png)", "jpg", "png"));
+private void selectImage() {
+    JFileChooser fc = new JFileChooser();
+    fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+        "Ảnh phòng (*.jpg, *.png)", "jpg", "png"));
+    
+    if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        File sourceFile = fc.getSelectedFile();
         
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            imagePath = fc.getSelectedFile().getAbsolutePath();
+        // Tạo thư mục images nếu chưa có
+        File imagesDir = new File("./images/rooms");
+        if (!imagesDir.exists()) {
+            imagesDir.mkdirs();
+        }
+        
+        // Copy ảnh vào thư mục project
+        String destPath = "./images/rooms/" + sourceFile.getName();
+        try {
+            Files.copy(sourceFile.toPath(), 
+                      new File(destPath).toPath(), 
+                      StandardCopyOption.REPLACE_EXISTING);
+            imagePath = destPath; // Lưu đường dẫn tương đối
             loadImagePreview();
+        } catch (IOException e) {
+            showError("Lỗi khi sao chép ảnh: " + e.getMessage());
         }
     }
+}
 
     private void loadImagePreview() {
         try {

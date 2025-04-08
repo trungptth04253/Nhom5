@@ -85,7 +85,7 @@ public static void main(String[] args) {
         return mainFrame;
     }
 
-    private static void openServiceFrame(String serviceType) {
+private static void openServiceFrame(String serviceType) {
     JFrame mainFrame = HotelBookingUI.getMainFrame();
     mainFrame.setVisible(false); // Ẩn frame chính
     
@@ -313,38 +313,39 @@ public static void main(String[] args) {
         return panel;
     }
 
-    private static JPanel createServiceCard(String imgPath, String title, String desc) {
-        JPanel card = new JPanel();
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(180, 180, 180)),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15))
-        );
+private static JPanel createServiceCard(String imgPath, String title, String desc) {
+    JPanel card = new JPanel();
+    card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+    card.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(180, 180, 180)),
+        BorderFactory.createEmptyBorder(15, 15, 15, 15))
+    );
+    card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Thêm sự kiện click
-        card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                openServiceFrame(title.trim());
-            }
-        });
+    // Thêm sự kiện click
+    card.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            openServiceFrame(title.trim());
+        }
+    });
 
-        JLabel imgLabel = createIconLabel(imgPath, 280, 160);
-        imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        card.add(imgLabel);
-        card.add(Box.createVerticalStrut(15));
+    // Phần còn lại của method giữ nguyên
+    JLabel imgLabel = createIconLabel(imgPath, 280, 160);
+    imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    card.add(imgLabel);
+    card.add(Box.createVerticalStrut(15));
 
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        card.add(titleLabel);
-        card.add(Box.createVerticalStrut(10));
+    JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+    card.add(titleLabel);
+    card.add(Box.createVerticalStrut(10));
 
-        JLabel descLabel = new JLabel(desc, SwingConstants.CENTER);
-        card.add(descLabel);
+    JLabel descLabel = new JLabel(desc, SwingConstants.CENTER);
+    card.add(descLabel);
 
-        return card;
-    }
-
+    return card;
+}
 
     private static JPanel createFooter() {
         JPanel panel = new JPanel();

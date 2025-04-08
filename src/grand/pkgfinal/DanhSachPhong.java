@@ -31,17 +31,12 @@ public class DanhSachPhong extends JFrame {
 
     private void connectDB() {
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            String connectionString = "jdbc:sqlserver://KEANDANHSIEUPHA:1433;"
-                + "databaseName=SOF2042_FINAL_TEST;"
-                + "user=sa;"
-                + "password=123;"
-                + "trustServerCertificate=true";
-            
-            connection = DriverManager.getConnection(connectionString);
+            Class.forName("org.sqlite.JDBC");
+            String dbPath = "hotel_booking.db";
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, 
-                "Lỗi kết nối CSDL: " + e.getMessage(), 
+                "Lỗi kết nối SQLite: " + e.getMessage(), 
                 "Lỗi", 
                 JOptionPane.ERROR_MESSAGE);
             System.exit(1);
