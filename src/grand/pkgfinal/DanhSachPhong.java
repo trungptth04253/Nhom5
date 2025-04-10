@@ -1,13 +1,13 @@
 package grand.pkgfinal;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import java.io.*;
+import java.sql.*;
+import javax.imageio.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.*;
-import java.io.File;
-import javax.imageio.ImageIO;
 
 public class DanhSachPhong extends JFrame {
     // Màu sắc chủ đạo
@@ -80,7 +80,14 @@ public class DanhSachPhong extends JFrame {
         
         add(mainPanel);
     }
-
+    
+    public void reloadRooms() {
+        contentPanel.removeAll();
+        loadRooms();
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+        
     private void loadRooms() {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM Phong ORDER BY SoPhong")) {
@@ -112,7 +119,6 @@ public class DanhSachPhong extends JFrame {
             new EmptyBorder(20, 20, 20, 20))
         );
         card.setMaximumSize(new Dimension(1140, 250));
-
         // Panel hình ảnh
         JPanel imagePanel = new JPanel();
         imagePanel.setPreferredSize(new Dimension(300, 200));
@@ -160,6 +166,15 @@ public class DanhSachPhong extends JFrame {
             btnDatPhong.setEnabled(false);
             btnDatPhong.setBackground(DISABLED_COLOR);
             btnDatPhong.setText("ĐÃ ĐẶT");
+        } else {
+            // Add ActionListener for booking
+            btnDatPhong.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    datphong bookingForm = new datphong(DanhSachPhong.this, connection, room);
+                    bookingForm.setVisible(true);
+                }
+            });
         }
 
         // Hiệu ứng hover
@@ -214,7 +229,7 @@ public class DanhSachPhong extends JFrame {
         }
     }
 
-    class Room {
+    public class Room {
         private int id;
         private int soPhong;
         private String loaiPhong;
@@ -236,6 +251,7 @@ public class DanhSachPhong extends JFrame {
         public String getLoaiPhong() { return loaiPhong; }
         public double getGiaPhong() { return giaPhong; }
         public String getTrangThai() { return trangThai; }
+        public int getId() { return id; }  // Fixed this method
     }
 
     public static void main(String[] args) {

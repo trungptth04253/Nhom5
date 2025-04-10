@@ -127,15 +127,15 @@ public class Admin extends JFrame {
                 });
             }
         } catch (SQLException e) {
-            System.err.println("SQL State: " + e.getSQLState()); // S0002
-            System.err.println("Error Code: " + e.getErrorCode()); // 50000
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
             showError("Lỗi truy vấn: " + e.getMessage());
         }
     }
 
     private void showEditDialog(Integer id) {
         JDialog dialog = new JDialog(this, id == null ? "Thêm phòng mới" : "Chỉnh sửa phòng", true);
-        JPanel panel = new JPanel(new GridLayout(6, 2, 15, 15));
+        JPanel panel = new JPanel(new GridLayout(id == null ? 5 : 6, 2, 15, 15));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Initialize components
@@ -149,6 +149,9 @@ public class Admin extends JFrame {
         // Load data if editing
         if (id != null) {
             loadExistingData(id);
+        } else {
+            // Với phòng mới, mặc định là "Trống"
+            cbTrangThai.setSelectedItem("Trống");
         }
         
         // Image chooser
@@ -161,8 +164,13 @@ public class Admin extends JFrame {
         panel.add(txtLoaiPhong);
         panel.add(new JLabel("Giá phòng*:"));
         panel.add(txtGiaPhong);
-        panel.add(new JLabel("Trạng thái*:"));
-        panel.add(cbTrangThai);
+        
+        // Chỉ hiển thị trạng thái khi chỉnh sửa phòng đã tồn tại
+        if (id != null) {
+            panel.add(new JLabel("Trạng thái*:"));
+            panel.add(cbTrangThai);
+        }
+        
         panel.add(new JLabel("Hình ảnh:"));
         panel.add(btnChooseImage);
         panel.add(new JLabel());
@@ -205,33 +213,33 @@ public class Admin extends JFrame {
         }
     }
 
-private void selectImage() {
-    JFileChooser fc = new JFileChooser();
-    fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-        "Ảnh phòng (*.jpg, *.png)", "jpg", "png"));
-    
-    if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-        File sourceFile = fc.getSelectedFile();
+    private void selectImage() {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Ảnh phòng (*.jpg, *.png)", "jpg", "png"));
         
-        // Tạo thư mục images nếu chưa có
-        File imagesDir = new File("./images/rooms");
-        if (!imagesDir.exists()) {
-            imagesDir.mkdirs();
-        }
-        
-        // Copy ảnh vào thư mục project
-        String destPath = "./images/rooms/" + sourceFile.getName();
-        try {
-            Files.copy(sourceFile.toPath(), 
-                      new File(destPath).toPath(), 
-                      StandardCopyOption.REPLACE_EXISTING);
-            imagePath = destPath; // Lưu đường dẫn tương đối
-            loadImagePreview();
-        } catch (IOException e) {
-            showError("Lỗi khi sao chép ảnh: " + e.getMessage());
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File sourceFile = fc.getSelectedFile();
+            
+            // Tạo thư mục images nếu chưa có
+            File imagesDir = new File("./images/rooms");
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs();
+            }
+            
+            // Copy ảnh vào thư mục project
+            String destPath = "./images/rooms/" + sourceFile.getName();
+            try {
+                Files.copy(sourceFile.toPath(), 
+                          new File(destPath).toPath(), 
+                          StandardCopyOption.REPLACE_EXISTING);
+                imagePath = destPath; // Lưu đường dẫn tương đối
+                loadImagePreview();
+            } catch (IOException e) {
+                showError("Lỗi khi sao chép ảnh: " + e.getMessage());
+            }
         }
     }
-}
 
     private void loadImagePreview() {
         try {
@@ -272,7 +280,14 @@ private void selectImage() {
             pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
             pstmt.setString(2, txtLoaiPhong.getText());
             pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
-            pstmt.setString(4, (String) cbTrangThai.getSelectedItem());
+            
+            // Với phòng mới, trạng thái luôn là "Trống"
+            if (id == null) {
+                pstmt.setString(4, "Trống");
+            } else {
+                pstmt.setString(4, (String) cbTrangThai.getSelectedItem());
+            }
+            
             pstmt.setString(5, imagePath);
             
             if (id != null) pstmt.setInt(6, id);
