@@ -17,15 +17,21 @@ public class Admin extends JFrame {
     private DefaultTableModel model;
     private Connection connection;
     private JTextField txtSoPhong, txtLoaiPhong, txtGiaPhong;
-    private JLabel lblImage, lblDetailImage, lblDetailSoPhong, lblDetailLoaiPhong, lblDetailGiaPhong;
+    private JLabel lblImage, lblDetailImage, lblDetailSoPhong, lblDetailLoaiPhong, lblDetailGiaPhong, lblDetailTrangThai;
     private String imagePath = "";
+    private static Admin instance;
+
+    public static Admin getInstance() {
+        return instance;
+    }
 
     public Admin() {
         super("Quản lý phòng - Admin");
+        instance = this;
         initializeUI();
         connectDB();
         loadData();
-        setSize(1200, 600); // Tăng kích thước để chứa panel chi tiết
+        setSize(1200, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -37,12 +43,26 @@ public class Admin extends JFrame {
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             
             try (Statement stmt = connection.createStatement()) {
+                // Tạo bảng Phong
                 stmt.execute("CREATE TABLE IF NOT EXISTS Phong (" +
                     "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "SoPhong INTEGER NOT NULL UNIQUE, " +
                     "LoaiPhong TEXT NOT NULL, " +
                     "GiaPhong REAL NOT NULL, " +
+                    "TrangThai TEXT NOT NULL DEFAULT 'Trống', " +
                     "HinhAnh TEXT)");
+                
+                // Tạo bảng DatPhong
+                stmt.execute("CREATE TABLE IF NOT EXISTS DatPhong (" +
+                    "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "IDPhong INTEGER NOT NULL, " +
+                    "HoTen TEXT NOT NULL, " +
+                    "CCCD TEXT NOT NULL, " +
+                    "SDT TEXT NOT NULL, " +
+                    "NgayNhan TEXT, " +
+                    "NgayTra TEXT, " +
+                    "NgayDat TEXT DEFAULT CURRENT_TIMESTAMP, " +
+                    "FOREIGN KEY (IDPhong) REFERENCES Phong(ID))");
             }
         } catch (SQLException e) {
             showError("Lỗi kết nối database: " + e.getMessage());
@@ -54,7 +74,7 @@ public class Admin extends JFrame {
         
         // Bảng danh sách phòng
         model = new DefaultTableModel(
-            new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
+            new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng", "Trạng thái"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -71,21 +91,25 @@ public class Admin extends JFrame {
         JButton btnEdit = new JButton("Sửa");
         JButton btnDelete = new JButton("Xóa");
         JButton btnView = new JButton("Xem DS Phòng");
+        JButton btnRefresh = new JButton("Làm mới");
         
         styleButton(btnAdd, new Color(0, 128, 0));
         styleButton(btnEdit, new Color(0, 0, 255));
         styleButton(btnDelete, new Color(255, 0, 0));
         styleButton(btnView, new Color(128, 0, 128));
+        styleButton(btnRefresh, new Color(255, 165, 0));
         
         btnAdd.addActionListener(e -> showEditDialog(null));
         btnEdit.addActionListener(e -> editSelected());
         btnDelete.addActionListener(e -> deleteSelected());
         btnView.addActionListener(e -> new DanhSachPhong().setVisible(true));
+        btnRefresh.addActionListener(e -> loadData());
         
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnView);
+        buttonPanel.add(btnRefresh);
         
         // Panel chi tiết
         JPanel detailPanel = createDetailPanel();
@@ -120,7 +144,7 @@ public class Admin extends JFrame {
         lblDetailImage.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         
         // Panel thông tin
-        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 5, 10));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         
         Font labelFont = new Font("Arial", Font.BOLD, 14);
@@ -141,12 +165,19 @@ public class Admin extends JFrame {
         lblDetailGiaPhong = new JLabel();
         lblDetailGiaPhong.setFont(valueFont);
         
+        JLabel lblTrangThaiTitle = new JLabel("Trạng thái:");
+        lblTrangThaiTitle.setFont(labelFont);
+        lblDetailTrangThai = new JLabel();
+        lblDetailTrangThai.setFont(valueFont);
+        
         infoPanel.add(lblSoPhongTitle);
         infoPanel.add(lblDetailSoPhong);
         infoPanel.add(lblLoaiPhongTitle);
         infoPanel.add(lblDetailLoaiPhong);
         infoPanel.add(lblGiaPhongTitle);
         infoPanel.add(lblDetailGiaPhong);
+        infoPanel.add(lblTrangThaiTitle);
+        infoPanel.add(lblDetailTrangThai);
         
         panel.add(lblDetailImage);
         panel.add(Box.createVerticalStrut(20));
@@ -171,6 +202,10 @@ public class Admin extends JFrame {
                     lblDetailSoPhong.setText(String.valueOf(rs.getInt("SoPhong")));
                     lblDetailLoaiPhong.setText(rs.getString("LoaiPhong"));
                     lblDetailGiaPhong.setText(String.format("%,.0f VND", rs.getDouble("GiaPhong")));
+                    lblDetailTrangThai.setText(rs.getString("TrangThai"));
+                    lblDetailTrangThai.setForeground(
+                        rs.getString("TrangThai").equals("Trống") ? Color.GREEN : Color.RED
+                    );
                     
                     // Hiển thị ảnh
                     String imagePath = rs.getString("HinhAnh");
@@ -197,6 +232,7 @@ public class Admin extends JFrame {
             lblDetailSoPhong.setText("");
             lblDetailLoaiPhong.setText("");
             lblDetailGiaPhong.setText("");
+            lblDetailTrangThai.setText("");
             lblDetailImage.setIcon(null);
             lblDetailImage.setText("Chọn một phòng để xem chi tiết");
         }
@@ -210,9 +246,9 @@ public class Admin extends JFrame {
         button.setPreferredSize(new Dimension(120, 35));
     }
 
-    private void loadData() {
+    public void loadData() {
         model.setRowCount(0);
-        String query = "SELECT ID, SoPhong, LoaiPhong, GiaPhong FROM Phong";
+        String query = "SELECT ID, SoPhong, LoaiPhong, GiaPhong, TrangThai FROM Phong";
         
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
@@ -222,7 +258,8 @@ public class Admin extends JFrame {
                     rs.getInt("ID"),
                     rs.getInt("SoPhong"),
                     rs.getString("LoaiPhong"),
-                    String.format("%,.0f VND", rs.getDouble("GiaPhong"))
+                    String.format("%,.0f VND", rs.getDouble("GiaPhong")),
+                    rs.getString("TrangThai")
                 });
             }
         } catch (SQLException e) {
@@ -387,6 +424,62 @@ public class Admin extends JFrame {
             
         } catch (SQLException e) {
             showError("Lỗi lưu dữ liệu: " + e.getMessage());
+        }
+    }
+
+    public boolean datPhong(int idPhong, String hoTen, String cccd, String sdt, String ngayNhan, String ngayTra) {
+        try {
+            // Bắt đầu transaction
+            connection.setAutoCommit(false);
+            
+            // 1. Kiểm tra phòng còn trống không
+            try (PreparedStatement checkStmt = connection.prepareStatement(
+                    "SELECT TrangThai FROM Phong WHERE ID = ?")) {
+                checkStmt.setInt(1, idPhong);
+                ResultSet rs = checkStmt.executeQuery();
+                
+                if (rs.next() && !rs.getString("TrangThai").equals("Trống")) {
+                    JOptionPane.showMessageDialog(this, "Phòng đã được đặt!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            
+            // 2. Cập nhật trạng thái phòng
+            try (PreparedStatement updateStmt = connection.prepareStatement(
+                    "UPDATE Phong SET TrangThai = 'Đã đặt' WHERE ID = ?")) {
+                updateStmt.setInt(1, idPhong);
+                updateStmt.executeUpdate();
+            }
+            
+            // 3. Lưu thông tin đặt phòng
+            try (PreparedStatement insertStmt = connection.prepareStatement(
+                    "INSERT INTO DatPhong (IDPhong, HoTen, CCCD, SDT, NgayNhan, NgayTra) VALUES (?, ?, ?, ?, ?, ?)")) {
+                insertStmt.setInt(1, idPhong);
+                insertStmt.setString(2, hoTen);
+                insertStmt.setString(3, cccd);
+                insertStmt.setString(4, sdt);
+                insertStmt.setString(5, ngayNhan);
+                insertStmt.setString(6, ngayTra);
+                insertStmt.executeUpdate();
+            }
+            
+            connection.commit();
+            return true;
+            
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            showError("Lỗi khi đặt phòng: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
