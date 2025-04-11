@@ -17,7 +17,7 @@ public class Admin extends JFrame {
     private DefaultTableModel model;
     private Connection connection;
     private JTextField txtSoPhong, txtLoaiPhong, txtGiaPhong;
-    private JLabel lblImage;
+    private JLabel lblImage, lblDetailImage, lblDetailSoPhong, lblDetailLoaiPhong, lblDetailGiaPhong;
     private String imagePath = "";
 
     public Admin() {
@@ -25,7 +25,7 @@ public class Admin extends JFrame {
         initializeUI();
         connectDB();
         loadData();
-        setSize(1000, 600);
+        setSize(1200, 600); // Tăng kích thước để chứa panel chi tiết
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -52,6 +52,7 @@ public class Admin extends JFrame {
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         
+        // Bảng danh sách phòng
         model = new DefaultTableModel(
             new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
             @Override
@@ -61,8 +62,10 @@ public class Admin extends JFrame {
         };
         
         table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(table);
         
+        // Panel nút chức năng
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         JButton btnAdd = new JButton("Thêm phòng");
         JButton btnEdit = new JButton("Sửa");
@@ -84,10 +87,119 @@ public class Admin extends JFrame {
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnView);
         
+        // Panel chi tiết
+        JPanel detailPanel = createDetailPanel();
+        
+        // Thêm các thành phần vào main panel
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(detailPanel, BorderLayout.EAST);
+        
+        // Sự kiện chọn hàng
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                showRoomDetails();
+            }
+        });
         
         this.add(mainPanel);
+    }
+
+    private JPanel createDetailPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Thông tin chi tiết"),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setPreferredSize(new Dimension(300, 0));
+        
+        // Panel hình ảnh
+        lblDetailImage = new JLabel("", SwingConstants.CENTER);
+        lblDetailImage.setPreferredSize(new Dimension(280, 200));
+        lblDetailImage.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        
+        // Panel thông tin
+        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 10));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        
+        Font labelFont = new Font("Arial", Font.BOLD, 14);
+        Font valueFont = new Font("Arial", Font.PLAIN, 14);
+        
+        JLabel lblSoPhongTitle = new JLabel("Số phòng:");
+        lblSoPhongTitle.setFont(labelFont);
+        lblDetailSoPhong = new JLabel();
+        lblDetailSoPhong.setFont(valueFont);
+        
+        JLabel lblLoaiPhongTitle = new JLabel("Loại phòng:");
+        lblLoaiPhongTitle.setFont(labelFont);
+        lblDetailLoaiPhong = new JLabel();
+        lblDetailLoaiPhong.setFont(valueFont);
+        
+        JLabel lblGiaPhongTitle = new JLabel("Giá phòng:");
+        lblGiaPhongTitle.setFont(labelFont);
+        lblDetailGiaPhong = new JLabel();
+        lblDetailGiaPhong.setFont(valueFont);
+        
+        infoPanel.add(lblSoPhongTitle);
+        infoPanel.add(lblDetailSoPhong);
+        infoPanel.add(lblLoaiPhongTitle);
+        infoPanel.add(lblDetailLoaiPhong);
+        infoPanel.add(lblGiaPhongTitle);
+        infoPanel.add(lblDetailGiaPhong);
+        
+        panel.add(lblDetailImage);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(infoPanel);
+        
+        return panel;
+    }
+
+    private void showRoomDetails() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            int id = (int) model.getValueAt(selectedRow, 0);
+            
+            try (PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT * FROM Phong WHERE ID = ?")) {
+                
+                pstmt.setInt(1, id);
+                ResultSet rs = pstmt.executeQuery();
+                
+                if (rs.next()) {
+                    // Hiển thị thông tin
+                    lblDetailSoPhong.setText(String.valueOf(rs.getInt("SoPhong")));
+                    lblDetailLoaiPhong.setText(rs.getString("LoaiPhong"));
+                    lblDetailGiaPhong.setText(String.format("%,.0f VND", rs.getDouble("GiaPhong")));
+                    
+                    // Hiển thị ảnh
+                    String imagePath = rs.getString("HinhAnh");
+                    if (imagePath != null && !imagePath.isEmpty()) {
+                        try {
+                            BufferedImage img = ImageIO.read(new File(imagePath));
+                            ImageIcon icon = new ImageIcon(img.getScaledInstance(280, 200, Image.SCALE_SMOOTH));
+                            lblDetailImage.setIcon(icon);
+                            lblDetailImage.setText("");
+                        } catch (IOException ex) {
+                            lblDetailImage.setIcon(null);
+                            lblDetailImage.setText("<html><center>Không tải được ảnh<br>" + imagePath + "</center></html>");
+                        }
+                    } else {
+                        lblDetailImage.setIcon(null);
+                        lblDetailImage.setText("Không có ảnh");
+                    }
+                }
+            } catch (SQLException ex) {
+                showError("Lỗi tải chi tiết phòng: " + ex.getMessage());
+            }
+        } else {
+            // Xóa thông tin khi không có hàng nào được chọn
+            lblDetailSoPhong.setText("");
+            lblDetailLoaiPhong.setText("");
+            lblDetailGiaPhong.setText("");
+            lblDetailImage.setIcon(null);
+            lblDetailImage.setText("Chọn một phòng để xem chi tiết");
+        }
     }
 
     private void styleButton(JButton button, Color color) {
