@@ -2,7 +2,7 @@ package Form;
 
 import DAOS.KhachHangDAO;
 import Models.KhachHang;
-import grand.pkgfinal.CustomerManagement;
+import Management.CustomerManagement;
 import grand.pkgfinal.HotelBookingUI;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -306,10 +306,10 @@ public class LoginSign extends JFrame {
         String name = txtRegUsername.getText().trim();
         Date dob;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
             dob = sdf.parse(txtRegDOB.getText().trim());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ. Vui lòng nhập định dạng yyyy-MM-dd", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ. Vui lòng nhập định dạng dd-mm-yyyy", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -349,11 +349,11 @@ public class LoginSign extends JFrame {
 
         // Validate date format
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             sdf.setLenient(false);
             sdf.parse(txtRegDOB.getText().trim());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ. Vui lòng nhập định dạng yyyy-MM-dd", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ. Vui lòng nhập định dạng dd-MM-yyyy", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 

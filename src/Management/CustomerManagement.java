@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package grand.pkgfinal;
+package Management;
 
 import DAOS.KhachHangDAO;
 import Form.LoginSign;
@@ -227,8 +227,9 @@ public class CustomerManagement extends javax.swing.JFrame {
                                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btn_Quaylai)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel1)))
+                                .addGap(119, 119, 119)
+                                .addComponent(jLabel1)
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addGap(56, 56, 56)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(btn_Them, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
@@ -440,8 +441,8 @@ public class CustomerManagement extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_XoaActionPerformed
 
     private void btn_QuaylaiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_QuaylaiActionPerformed
-        this.dispose(); // Đóng cửa sổ hiện tại
-        new LoginSign(); // Mở lại giao diện đăng nhập
+          this.dispose(); // Close current window
+            new Admin().setVisible(true); // Open Admin window
     }//GEN-LAST:event_btn_QuaylaiActionPerformed
 
     /**

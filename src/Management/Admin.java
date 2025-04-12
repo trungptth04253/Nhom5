@@ -1,5 +1,6 @@
-package grand.pkgfinal;
+package Management;
 
+import grand.pkgfinal.DanhSachPhong;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -13,6 +14,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 public class Admin extends JFrame {
+
     private JTable table;
     private DefaultTableModel model;
     private Connection connection;
@@ -35,14 +37,14 @@ public class Admin extends JFrame {
         try {
             String dbPath = "hotel_booking.db";
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-            
+
             try (Statement stmt = connection.createStatement()) {
-                stmt.execute("CREATE TABLE IF NOT EXISTS Phong (" +
-                    "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "SoPhong INTEGER NOT NULL UNIQUE, " +
-                    "LoaiPhong TEXT NOT NULL, " +
-                    "GiaPhong REAL NOT NULL, " +
-                    "HinhAnh TEXT)");
+                stmt.execute("CREATE TABLE IF NOT EXISTS Phong ("
+                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "SoPhong INTEGER NOT NULL UNIQUE, "
+                        + "LoaiPhong TEXT NOT NULL, "
+                        + "GiaPhong REAL NOT NULL, "
+                        + "HinhAnh TEXT)");
             }
         } catch (SQLException e) {
             showError("Lỗi kết nối database: " + e.getMessage());
@@ -51,57 +53,72 @@ public class Admin extends JFrame {
 
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        
+
         // Bảng danh sách phòng
         model = new DefaultTableModel(
-            new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
+                new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        
+
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(table);
-        
+
         // Panel nút chức năng
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         JButton btnAdd = new JButton("Thêm phòng");
         JButton btnEdit = new JButton("Sửa");
         JButton btnDelete = new JButton("Xóa");
         JButton btnView = new JButton("Xem DS Phòng");
-        
+        JButton btnEmployeeMgmt = new JButton("Quản lý NV");
+        JButton btnCustomerMgmt = new JButton("Quản lý KH");
+
         styleButton(btnAdd, new Color(0, 128, 0));
         styleButton(btnEdit, new Color(0, 0, 255));
         styleButton(btnDelete, new Color(255, 0, 0));
         styleButton(btnView, new Color(128, 0, 128));
-        
+        styleButton(btnEmployeeMgmt, new Color(255, 165, 0));
+        styleButton(btnCustomerMgmt, new Color(0, 191, 255));
+
         btnAdd.addActionListener(e -> showEditDialog(null));
         btnEdit.addActionListener(e -> editSelected());
         btnDelete.addActionListener(e -> deleteSelected());
         btnView.addActionListener(e -> new DanhSachPhong().setVisible(true));
-        
+        btnEmployeeMgmt.addActionListener(e -> {
+            this.dispose();
+            new EmployeeManagementtt().setVisible(true);
+        });
+
+        btnCustomerMgmt.addActionListener(e -> {
+            this.dispose();
+            new CustomerManagement().setVisible(true);
+        });
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnView);
-        
+        buttonPanel.add(btnEmployeeMgmt);
+        buttonPanel.add(btnCustomerMgmt);
         // Panel chi tiết
         JPanel detailPanel = createDetailPanel();
-        
+
         // Thêm các thành phần vào main panel
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(detailPanel, BorderLayout.EAST);
-        
+
         // Sự kiện chọn hàng
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 showRoomDetails();
             }
+
         });
-        
+
         this.add(mainPanel);
     }
 
@@ -109,49 +126,49 @@ public class Admin extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder("Thông tin chi tiết"),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createTitledBorder("Thông tin chi tiết"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         panel.setPreferredSize(new Dimension(300, 0));
-        
+
         // Panel hình ảnh
         lblDetailImage = new JLabel("", SwingConstants.CENTER);
         lblDetailImage.setPreferredSize(new Dimension(280, 200));
         lblDetailImage.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        
+
         // Panel thông tin
         JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 10));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        
+
         Font labelFont = new Font("Arial", Font.BOLD, 14);
         Font valueFont = new Font("Arial", Font.PLAIN, 14);
-        
+
         JLabel lblSoPhongTitle = new JLabel("Số phòng:");
         lblSoPhongTitle.setFont(labelFont);
         lblDetailSoPhong = new JLabel();
         lblDetailSoPhong.setFont(valueFont);
-        
+
         JLabel lblLoaiPhongTitle = new JLabel("Loại phòng:");
         lblLoaiPhongTitle.setFont(labelFont);
         lblDetailLoaiPhong = new JLabel();
         lblDetailLoaiPhong.setFont(valueFont);
-        
+
         JLabel lblGiaPhongTitle = new JLabel("Giá phòng:");
         lblGiaPhongTitle.setFont(labelFont);
         lblDetailGiaPhong = new JLabel();
         lblDetailGiaPhong.setFont(valueFont);
-        
+
         infoPanel.add(lblSoPhongTitle);
         infoPanel.add(lblDetailSoPhong);
         infoPanel.add(lblLoaiPhongTitle);
         infoPanel.add(lblDetailLoaiPhong);
         infoPanel.add(lblGiaPhongTitle);
         infoPanel.add(lblDetailGiaPhong);
-        
+
         panel.add(lblDetailImage);
         panel.add(Box.createVerticalStrut(20));
         panel.add(infoPanel);
-        
+
         return panel;
     }
 
@@ -159,19 +176,19 @@ public class Admin extends JFrame {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             int id = (int) model.getValueAt(selectedRow, 0);
-            
+
             try (PreparedStatement pstmt = connection.prepareStatement(
-                "SELECT * FROM Phong WHERE ID = ?")) {
-                
+                    "SELECT * FROM Phong WHERE ID = ?")) {
+
                 pstmt.setInt(1, id);
                 ResultSet rs = pstmt.executeQuery();
-                
+
                 if (rs.next()) {
                     // Hiển thị thông tin
                     lblDetailSoPhong.setText(String.valueOf(rs.getInt("SoPhong")));
                     lblDetailLoaiPhong.setText(rs.getString("LoaiPhong"));
                     lblDetailGiaPhong.setText(String.format("%,.0f VND", rs.getDouble("GiaPhong")));
-                    
+
                     // Hiển thị ảnh
                     String imagePath = rs.getString("HinhAnh");
                     if (imagePath != null && !imagePath.isEmpty()) {
@@ -213,9 +230,8 @@ public class Admin extends JFrame {
     private void loadData() {
         model.setRowCount(0);
         String query = "SELECT ID, SoPhong, LoaiPhong, GiaPhong FROM Phong";
-        
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
                 model.addRow(new Object[]{
@@ -241,13 +257,13 @@ public class Admin extends JFrame {
         lblImage = new JLabel("", SwingConstants.CENTER);
         lblImage.setPreferredSize(new Dimension(200, 150));
         JButton btnChooseImage = new JButton("Chọn ảnh...");
-        
+
         if (id != null) {
             loadExistingData(id);
         }
-        
+
         btnChooseImage.addActionListener(e -> selectImage());
-        
+
         panel.add(new JLabel("Số phòng*:"));
         panel.add(txtSoPhong);
         panel.add(new JLabel("Loại phòng*:"));
@@ -258,7 +274,7 @@ public class Admin extends JFrame {
         panel.add(btnChooseImage);
         panel.add(new JLabel("Xem trước:"));
         panel.add(lblImage);
-        
+
         JButton btnSave = new JButton("Lưu thông tin");
         btnSave.addActionListener(e -> {
             if (validateInput()) {
@@ -267,7 +283,7 @@ public class Admin extends JFrame {
                 loadData();
             }
         });
-        
+
         dialog.add(panel, BorderLayout.CENTER);
         dialog.add(btnSave, BorderLayout.SOUTH);
         dialog.pack();
@@ -277,11 +293,11 @@ public class Admin extends JFrame {
 
     private void loadExistingData(int id) {
         try (PreparedStatement pstmt = connection.prepareStatement(
-            "SELECT * FROM Phong WHERE ID = ?")) {
-            
+                "SELECT * FROM Phong WHERE ID = ?")) {
+
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 txtSoPhong.setText(String.valueOf(rs.getInt("SoPhong")));
                 txtLoaiPhong.setText(rs.getString("LoaiPhong"));
@@ -298,11 +314,11 @@ public class Admin extends JFrame {
         JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("Chọn ảnh phòng");
         fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Ảnh (*.jpg, *.png)", "jpg", "png"));
-        
+                "Ảnh (*.jpg, *.png)", "jpg", "png"));
+
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            
+
             File imagesDir = new File("images");
             if (!imagesDir.exists()) {
                 boolean created = imagesDir.mkdir();
@@ -311,21 +327,21 @@ public class Admin extends JFrame {
                     return;
                 }
             }
-            
-            String fileName = "room_" + System.currentTimeMillis() + 
-                           selectedFile.getName().substring(selectedFile.getName().lastIndexOf("."));
+
+            String fileName = "room_" + System.currentTimeMillis()
+                    + selectedFile.getName().substring(selectedFile.getName().lastIndexOf("."));
             File destFile = new File(imagesDir, fileName);
-            
+
             try {
                 Files.copy(
-                    selectedFile.toPath(),
-                    destFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING
+                        selectedFile.toPath(),
+                        destFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
                 );
-                
+
                 imagePath = "images/" + fileName;
                 loadImagePreview();
-                
+
             } catch (IOException ex) {
                 showError("Lỗi khi sao chép ảnh: " + ex.getMessage());
                 ex.printStackTrace();
@@ -350,17 +366,17 @@ public class Admin extends JFrame {
 
     private boolean validateInput() {
         try {
-            if (txtSoPhong.getText().trim().isEmpty() ||
-                txtLoaiPhong.getText().trim().isEmpty() ||
-                txtGiaPhong.getText().trim().isEmpty()) {
+            if (txtSoPhong.getText().trim().isEmpty()
+                    || txtLoaiPhong.getText().trim().isEmpty()
+                    || txtGiaPhong.getText().trim().isEmpty()) {
                 showError("Vui lòng điền đầy đủ các trường bắt buộc (*)");
                 return false;
             }
-            
+
             Integer.parseInt(txtSoPhong.getText());
             Double.parseDouble(txtGiaPhong.getText());
             return true;
-            
+
         } catch (NumberFormatException e) {
             showError("Số phòng và giá phòng phải là số hợp lệ!");
             return false;
@@ -368,23 +384,23 @@ public class Admin extends JFrame {
     }
 
     private void saveRoom(Integer id) {
-        String sql = id == null ?
-            "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh) VALUES (?, ?, ?, ?)" :
-            "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ? WHERE ID = ?";
-        
+        String sql = id == null
+                ? "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh) VALUES (?, ?, ?, ?)"
+                : "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ? WHERE ID = ?";
+
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
             pstmt.setString(2, txtLoaiPhong.getText());
             pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
             pstmt.setString(4, imagePath);
-            
+
             if (id != null) {
                 pstmt.setInt(5, id);
             }
-            
+
             pstmt.executeUpdate();
             JOptionPane.showMessageDialog(this, "Lưu thành công!");
-            
+
         } catch (SQLException e) {
             showError("Lỗi lưu dữ liệu: " + e.getMessage());
         }
@@ -404,21 +420,21 @@ public class Admin extends JFrame {
         int row = table.getSelectedRow();
         if (row >= 0) {
             int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc chắn muốn xóa phòng này?",
-                "Xác nhận xóa",
-                JOptionPane.YES_NO_OPTION);
-            
+                    "Bạn có chắc chắn muốn xóa phòng này?",
+                    "Xác nhận xóa",
+                    JOptionPane.YES_NO_OPTION);
+
             if (confirm == JOptionPane.YES_OPTION) {
                 int id = (int) model.getValueAt(row, 0);
-                
+
                 try (PreparedStatement pstmt = connection.prepareStatement(
-                    "DELETE FROM Phong WHERE ID = ?")) {
-                    
+                        "DELETE FROM Phong WHERE ID = ?")) {
+
                     pstmt.setInt(1, id);
                     pstmt.executeUpdate();
                     loadData();
                     JOptionPane.showMessageDialog(this, "Xóa thành công!");
-                    
+
                 } catch (SQLException e) {
                     showError("Lỗi xóa dữ liệu: " + e.getMessage());
                 }
@@ -430,9 +446,9 @@ public class Admin extends JFrame {
 
     private void showError(String message) {
         JOptionPane.showMessageDialog(this,
-            message,
-            "Lỗi",
-            JOptionPane.ERROR_MESSAGE);
+                message,
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
     }
 
     public static void main(String[] args) {
