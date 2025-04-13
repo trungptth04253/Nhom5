@@ -33,23 +33,24 @@ public class Admin extends JFrame {
         setVisible(true);
     }
 
-    private void connectDB() {
-        try {
-            String dbPath = "hotel_booking.db";
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+   private void connectDB() {
+    try {
+        String dbPath = "hotel_booking.db";
+        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
-            try (Statement stmt = connection.createStatement()) {
-                stmt.execute("CREATE TABLE IF NOT EXISTS Phong ("
-                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        + "SoPhong INTEGER NOT NULL UNIQUE, "
-                        + "LoaiPhong TEXT NOT NULL, "
-                        + "GiaPhong REAL NOT NULL, "
-                        + "HinhAnh TEXT)");
-            }
-        } catch (SQLException e) {
-            showError("Lỗi kết nối database: " + e.getMessage());
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS Phong ("
+                    + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "SoPhong INTEGER NOT NULL UNIQUE, "
+                    + "LoaiPhong TEXT NOT NULL, "
+                    + "GiaPhong REAL NOT NULL, "
+                    + "TrangThai TEXT NOT NULL DEFAULT 'Trống', "
+                    + "HinhAnh TEXT)");
         }
+    } catch (SQLException e) {
+        showError("Lỗi kết nối database: " + e.getMessage());
     }
+}
 
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -383,28 +384,39 @@ public class Admin extends JFrame {
         }
     }
 
-    private void saveRoom(Integer id) {
-        String sql = id == null
-                ? "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh) VALUES (?, ?, ?, ?)"
-                : "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ? WHERE ID = ?";
+private void saveRoom(Integer id) {
+    String sql = id == null
+            ? "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh, TrangThai) VALUES (?, ?, ?, ?, ?)"
+            : "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ?, TrangThai = ? WHERE ID = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
-            pstmt.setString(2, txtLoaiPhong.getText());
-            pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
-            pstmt.setString(4, imagePath);
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
+        pstmt.setString(2, txtLoaiPhong.getText());
+        pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
+        pstmt.setString(4, imagePath);
+        // Set default status to "Trống" for new rooms or keep existing status for updates
+        pstmt.setString(5, "Trống");
 
-            if (id != null) {
-                pstmt.setInt(5, id);
+        if (id != null) {
+            // For updating, we need to get the current status to maintain it
+            try (PreparedStatement checkStmt = connection.prepareStatement("SELECT TrangThai FROM Phong WHERE ID = ?")) {
+                checkStmt.setInt(1, id);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next()) {
+                    // Keep the existing status when updating
+                    pstmt.setString(5, rs.getString("TrangThai"));
+                }
             }
-
-            pstmt.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Lưu thành công!");
-
-        } catch (SQLException e) {
-            showError("Lỗi lưu dữ liệu: " + e.getMessage());
+            pstmt.setInt(6, id);
         }
+
+        pstmt.executeUpdate();
+        JOptionPane.showMessageDialog(this, "Lưu thành công!");
+
+    } catch (SQLException e) {
+        showError("Lỗi lưu dữ liệu: " + e.getMessage());
     }
+}
 
     private void editSelected() {
         int row = table.getSelectedRow();
