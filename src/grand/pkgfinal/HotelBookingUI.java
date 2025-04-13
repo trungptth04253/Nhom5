@@ -206,26 +206,35 @@ public class HotelBookingUI {
     }
 
     private static JPanel createActionButtons() {
-        JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
+    JPanel panel = new JPanel();
+    panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
 
-        RoundedButton btnMenu = new RoundedButton("MENU");
-        customizeButton(btnMenu, Color.GRAY);
+    RoundedButton btnMenu = new RoundedButton("MENU");
+    customizeButton(btnMenu, Color.BLUE);
+    // Thêm ActionListener cho nút MENU
+    btnMenu.addActionListener(e -> {
+        // Lấy frame chính
+        JFrame mainFrame = HotelBookingUI.getMainFrame();
+        // Ẩn frame chính
+        mainFrame.setVisible(false);
+        // Mở giao diện Menu và truyền frame chính để có thể quay lại
+        new Menu(mainFrame);
+    });
 
-        RoundedButton btnBook = new RoundedButton("ĐẶT PHÒNG");
-        customizeButton(btnBook, new Color(240, 194, 57));
-        btnBook.addActionListener(e -> showBookingDialog(null));
+    RoundedButton btnBook = new RoundedButton("ĐẶT PHÒNG");
+    customizeButton(btnBook, new Color(240, 194, 57));
+    btnBook.addActionListener(e -> showBookingDialog(null));
 
-        RoundedButton btnMyBooking = new RoundedButton("MY BOOKING");
-        customizeButton(btnMyBooking, Color.GRAY);
+    RoundedButton btnMyBooking = new RoundedButton("MY BOOKING");
+    customizeButton(btnMyBooking, Color.GRAY);
 
-        panel.add(btnMenu);
-        panel.add(Box.createHorizontalStrut(15));
-        panel.add(btnBook);
-        panel.add(Box.createHorizontalStrut(15));
-        panel.add(btnMyBooking);
-        return panel;
-    }
+    panel.add(btnMenu);
+    panel.add(Box.createHorizontalStrut(15));
+    panel.add(btnBook);
+    panel.add(Box.createHorizontalStrut(15));
+    panel.add(btnMyBooking);
+    return panel;
+}
 
     private static JPanel createHotelListings() {
         JPanel panel = new JPanel();
