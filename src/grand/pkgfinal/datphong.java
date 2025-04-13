@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package grand.pkgfinal;
 import grand.pkgfinal.DanhSachPhong.Room;
 import javax.swing.*;
@@ -29,9 +25,6 @@ public class datphong extends JDialog {
     private JTextField txtTenKhach;
     private JTextField txtSDT;
     private JTextField txtEmail;
-    private JTextField txtCMND;
-    private JTextField txtDiaChi;
-    private JComboBox<String> cmbNhanVien;
     private JLabel lblTotalPrice;
     private double totalPrice;
     
@@ -41,13 +34,46 @@ public class datphong extends JDialog {
         this.connection = conn;
         this.room = selectedRoom;
         
+        // Create required tables
+        createTablesIfNeeded();
+        
         initializeUI();
-        loadNhanVien();
         calculatePrice();
         
         setSize(800, 700);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    }
+    
+    private void createTablesIfNeeded() {
+        try {
+            Statement stmt = connection.createStatement();
+            
+            // Create KhachHang table if it doesn't exist
+            stmt.execute("CREATE TABLE IF NOT EXISTS KhachHang (" +
+                         "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                         "HoTen TEXT NOT NULL, " +
+                         "SDT TEXT, " +
+                         "Email TEXT)");
+            
+            // Create DatPhong table if it doesn't exist (removed ID_NhanVien field)
+            stmt.execute("CREATE TABLE IF NOT EXISTS DatPhong (" +
+                         "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                         "ID_KhachHang INTEGER, " +
+                         "ID_Phong INTEGER, " +
+                         "NgayDatPhong TEXT, " +
+                         "CheckIn TEXT, " +
+                         "CheckOut TEXT, " +
+                         "TrangThai TEXT, " +
+                         "ThanhToan REAL)");
+            
+            stmt.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this,
+                "Lỗi khởi tạo cơ sở dữ liệu: " + e.getMessage(),
+                "Lỗi",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void initializeUI() {
@@ -159,9 +185,9 @@ public class datphong extends JDialog {
         JPanel checkInPanel = createLabelFieldPanel("Check-in:", checkInChooser);
         JPanel checkOutPanel = createLabelFieldPanel("Check-out:", checkOutChooser);
         
-        // Nhân viên dropdown
-        cmbNhanVien = new JComboBox<>();
-        JPanel nhanVienPanel = createLabelFieldPanel("Nhân viên:", cmbNhanVien);
+        // Empty panel to maintain layout
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setBackground(Color.WHITE);
         
         // Total price panel
         JPanel pricePanel = new JPanel(new BorderLayout());
@@ -178,25 +204,21 @@ public class datphong extends JDialog {
         
         bookingPanel.add(checkInPanel);
         bookingPanel.add(checkOutPanel);
-        bookingPanel.add(nhanVienPanel);
+        bookingPanel.add(emptyPanel);
         bookingPanel.add(pricePanel);
         
         // Customer info panel
-        JPanel customerPanel = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel customerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
         customerPanel.setBackground(Color.WHITE);
         customerPanel.setBorder(BorderFactory.createTitledBorder("Thông tin khách hàng"));
         
         txtTenKhach = new JTextField();
         txtSDT = new JTextField();
         txtEmail = new JTextField();
-        txtCMND = new JTextField();
-        txtDiaChi = new JTextField();
         
         customerPanel.add(createLabelFieldPanel("Tên khách hàng:", txtTenKhach));
         customerPanel.add(createLabelFieldPanel("Số điện thoại:", txtSDT));
         customerPanel.add(createLabelFieldPanel("Email:", txtEmail));
-        customerPanel.add(createLabelFieldPanel("CMND/CCCD:", txtCMND));
-        customerPanel.add(createLabelFieldPanel("Địa chỉ:", txtDiaChi));
         
         panel.add(bookingPanel);
         panel.add(Box.createVerticalStrut(20));
@@ -246,26 +268,6 @@ public class datphong extends JDialog {
         return panel;
     }
     
-    private void loadNhanVien() {
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT ID, HoTen FROM NhanVien");
-            
-            while (rs.next()) {
-                String nhanVienInfo = rs.getInt("ID") + " - " + rs.getString("HoTen");
-                cmbNhanVien.addItem(nhanVienInfo);
-            }
-            
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Lỗi tải danh sách nhân viên: " + e.getMessage(), 
-                "Lỗi", 
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
     private void calculatePrice() {
         Date checkIn = checkInChooser.getDate();
         Date checkOut = checkOutChooser.getDate();
@@ -297,25 +299,22 @@ public class datphong extends JDialog {
             // 1. Insert into KhachHang if not exists
             int khachHangID = insertOrGetKhachHang();
             
-            // 2. Insert into DatPhong
-            int nhanVienID = Integer.parseInt(cmbNhanVien.getSelectedItem().toString().split(" - ")[0]);
-            
+            // 2. Insert into DatPhong (removed ID_NhanVien field)
             PreparedStatement pstmt = connection.prepareStatement(
-                "INSERT INTO DatPhong (ID_KhachHang, ID_Phong, ID_NhanVien, NgayDatPhong, CheckIn, CheckOut, TrangThai, ThanhToan) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO DatPhong (ID_KhachHang, ID_Phong, NgayDatPhong, CheckIn, CheckOut, TrangThai, ThanhToan) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
             );
             
             pstmt.setInt(1, khachHangID);
             pstmt.setInt(2, room.getId());
-            pstmt.setInt(3, nhanVienID);
-            pstmt.setDate(4, new java.sql.Date(System.currentTimeMillis()));
+            pstmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
             
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            pstmt.setString(5, sdf.format(checkInChooser.getDate()));
-            pstmt.setString(6, sdf.format(checkOutChooser.getDate()));
-            pstmt.setString(7, "Đã đặt");
-            pstmt.setDouble(8, totalPrice);
+            pstmt.setString(4, sdf.format(checkInChooser.getDate()));
+            pstmt.setString(5, sdf.format(checkOutChooser.getDate()));
+            pstmt.setString(6, "Đã đặt");
+            pstmt.setDouble(7, totalPrice);
             
             pstmt.executeUpdate();
             
@@ -359,13 +358,12 @@ public class datphong extends JDialog {
     }
     
     private int insertOrGetKhachHang() throws SQLException {
-        // First check if customer exists
+        // First check if customer exists (by name and phone number)
         PreparedStatement checkStmt = connection.prepareStatement(
-            "SELECT ID FROM KhachHang WHERE CMND = ? OR (HoTen = ? AND SDT = ?)"
+            "SELECT ID FROM KhachHang WHERE HoTen = ? AND SDT = ?"
         );
-        checkStmt.setString(1, txtCMND.getText().trim());
-        checkStmt.setString(2, txtTenKhach.getText().trim());
-        checkStmt.setString(3, txtSDT.getText().trim());
+        checkStmt.setString(1, txtTenKhach.getText().trim());
+        checkStmt.setString(2, txtSDT.getText().trim());
         
         ResultSet rs = checkStmt.executeQuery();
         if (rs.next()) {
@@ -374,14 +372,12 @@ public class datphong extends JDialog {
         } else {
             // Insert new customer
             PreparedStatement insertStmt = connection.prepareStatement(
-                "INSERT INTO KhachHang (HoTen, SDT, Email, CMND, DiaChi) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO KhachHang (HoTen, SDT, Email) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
             );
             insertStmt.setString(1, txtTenKhach.getText().trim());
             insertStmt.setString(2, txtSDT.getText().trim());
             insertStmt.setString(3, txtEmail.getText().trim());
-            insertStmt.setString(4, txtCMND.getText().trim());
-            insertStmt.setString(5, txtDiaChi.getText().trim());
             
             insertStmt.executeUpdate();
             
@@ -428,24 +424,6 @@ public class datphong extends JDialog {
                 "Lỗi",
                 JOptionPane.ERROR_MESSAGE);
             txtSDT.requestFocus();
-            return false;
-        }
-        
-        if (txtCMND.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Vui lòng nhập CMND/CCCD",
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
-            txtCMND.requestFocus();
-            return false;
-        }
-        
-        // Validate staff selection
-        if (cmbNhanVien.getSelectedIndex() == -1) {
-            JOptionPane.showMessageDialog(this,
-                "Vui lòng chọn nhân viên phụ trách",
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
