@@ -13,6 +13,7 @@ import java.nio.file.StandardCopyOption;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
+
 public class Admin extends JFrame {
 
     private JTable table;
@@ -21,13 +22,14 @@ public class Admin extends JFrame {
     private JTextField txtSoPhong, txtLoaiPhong, txtGiaPhong;
     private JLabel lblImage, lblDetailImage, lblDetailSoPhong, lblDetailLoaiPhong, lblDetailGiaPhong;
     private String imagePath = "";
+    private JButton btnServiceMgmt;
 
     public Admin() {
         super("Quản lý phòng - Admin");
         initializeUI();
         connectDB();
         loadData();
-        setSize(1200, 600); // Tăng kích thước để chứa panel chi tiết
+        setSize(1200, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -75,14 +77,13 @@ public class Admin extends JFrame {
         JButton btnDelete = new JButton("Xóa");
         JButton btnView = new JButton("Xem DS Phòng");
         JButton btnEmployeeMgmt = new JButton("Quản lý NV");
-        JButton btnCustomerMgmt = new JButton("Quản lý KH");
+
 
         styleButton(btnAdd, new Color(0, 128, 0));
         styleButton(btnEdit, new Color(0, 0, 255));
         styleButton(btnDelete, new Color(255, 0, 0));
         styleButton(btnView, new Color(128, 0, 128));
         styleButton(btnEmployeeMgmt, new Color(255, 165, 0));
-        styleButton(btnCustomerMgmt, new Color(0, 191, 255));
 
         btnAdd.addActionListener(e -> showEditDialog(null));
         btnEdit.addActionListener(e -> editSelected());
@@ -93,17 +94,12 @@ public class Admin extends JFrame {
             new EmployeeManagementtt().setVisible(true);
         });
 
-        btnCustomerMgmt.addActionListener(e -> {
-            this.dispose();
-            new CustomerManagement().setVisible(true);
-        });
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnView);
         buttonPanel.add(btnEmployeeMgmt);
-        buttonPanel.add(btnCustomerMgmt);
         // Panel chi tiết
         JPanel detailPanel = createDetailPanel();
 
