@@ -1,41 +1,32 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
 import java.util.Date;
 
-/**
- *
- * @author Admin
- */
 public class KhachHang {
-    int ID;
-    String Ten;
-    Date NgaySinh;
-    String GioiTinh;
-    int Tuoi;
-    int CCCD;
-    int SĐT;
-    String Email;
-    String MatKhau;
-
+    private int ID;
+    private String Ten;
+    private Date NgaySinh;
+    private String GioiTinh;
+    private String SDT;
+    private String Email;
+    private String MatKhau;
+    
     public KhachHang() {
     }
-
-    public KhachHang(int ID, String Ten, Date NgaySinh, String GioiTinh, int Tuoi, int CCCD, int SĐT, String Email, String MatKhau) {
+    
+    // Constructor đã xóa Tuoi và CCCD
+    public KhachHang(int ID, String Ten, Date NgaySinh, String GioiTinh, 
+                   String SDT, String Email, String MatKhau) {
         this.ID = ID;
         this.Ten = Ten;
         this.NgaySinh = NgaySinh;
         this.GioiTinh = GioiTinh;
-        this.Tuoi = Tuoi;
-        this.CCCD = CCCD;
-        this.SĐT = SĐT;
+        this.SDT = SDT;
         this.Email = Email;
         this.MatKhau = MatKhau;
     }
 
+    // Các getter/setter cho Tuoi và CCCD ĐÃ ĐƯỢC XÓA
     public int getID() {
         return ID;
     }
@@ -68,28 +59,12 @@ public class KhachHang {
         this.GioiTinh = GioiTinh;
     }
 
-    public int getTuoi() {
-        return Tuoi;
+    public String getSĐT() {
+        return SDT;
     }
 
-    public void setTuoi(int Tuoi) {
-        this.Tuoi = Tuoi;
-    }
-
-    public int getCCCD() {
-        return CCCD;
-    }
-
-    public void setCCCD(int CCCD) {
-        this.CCCD = CCCD;
-    }
-
-    public int getSĐT() {
-        return SĐT;
-    }
-
-    public void setSĐT(int SĐT) {
-        this.SĐT = SĐT;
+    public void setSĐT(String SDT) {
+        this.SDT = SDT;
     }
 
     public String getEmail() {
@@ -107,6 +82,15 @@ public class KhachHang {
     public void setMatKhau(String MatKhau) {
         this.MatKhau = MatKhau;
     }
-
-   
+    
+    @Override
+    public String toString() {
+        return "KhachHang{" + 
+               "ID=" + ID + 
+               ", Ten=" + Ten + 
+               ", NgaySinh=" + NgaySinh + 
+               ", GioiTinh=" + GioiTinh + 
+               ", SDT=" + SDT + 
+               ", Email=" + Email + '}';
+    }
 }

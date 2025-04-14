@@ -137,16 +137,9 @@ public class HotelBookingUI {
         navPanel.add(socialPanel, BorderLayout.WEST);
         navPanel.add(logoPanel, BorderLayout.CENTER);
         navPanel.add(authPanel, BorderLayout.EAST);
-        
-        
-        JButton logoutButton = new JButton("Đăng xuất");
-        logoutButton.addActionListener(e -> {
-            mainFrame.dispose(); // Đóng cửa sổ hiện tại
-            new LoginSign(); // Mở lại giao diện đăng nhập
-        });
-        authPanel.add(logoutButton);
+       
         return navPanel;
-        
+
     }
 
     private static JPanel createBannerSection() {
@@ -210,7 +203,7 @@ public class HotelBookingUI {
     panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
 
     RoundedButton btnMenu = new RoundedButton("MENU");
-    customizeButton(btnMenu, Color.BLUE);
+    customizeButton(btnMenu, Color.GRAY);
     // Thêm ActionListener cho nút MENU
     btnMenu.addActionListener(e -> {
         // Lấy frame chính

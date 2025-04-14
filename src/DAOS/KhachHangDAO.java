@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAOS;
 
 import Models.KhachHang;
@@ -9,110 +5,281 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author Admin
- */
 public class KhachHangDAO {
+    
+    private static final Logger LOGGER = Logger.getLogger(KhachHangDAO.class.getName());
+    private static final String DB_PATH = "khachhang.db";
+    private static final String CONNECTION_STRING = "jdbc:sqlite:" + DB_PATH;
+    
+    // SQL tạo bảng (ĐÃ XÓA CCCD VÀ TUỔI)
+    private static final String CREATE_TABLE = 
+            "CREATE TABLE IF NOT EXISTS KhachHang (" +
+            "ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "Ten TEXT NOT NULL, " +
+            "NgaySinh TEXT NOT NULL, " +
+            "GioiTinh TEXT NOT NULL, " +
+            "SDT TEXT NOT NULL, " +
+            "Email TEXT NOT NULL UNIQUE, " +
+            "MatKhau TEXT NOT NULL)";
+    
+    // Các câu lệnh SQL
+    private static final String GET_ALL = "SELECT * FROM KhachHang";
+    private static final String CREATE_KH = 
+            "INSERT INTO KhachHang (Ten, NgaySinh, GioiTinh, SDT, Email, MatKhau) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_KH = 
+            "UPDATE KhachHang SET Ten = ?, NgaySinh = ?, GioiTinh = ?, SDT = ?, Email = ?, MatKhau = ? WHERE ID = ?";
+    private static final String DELETE_KH = "DELETE FROM KhachHang WHERE ID = ?";
+    private static final String SEARCH_KH = "SELECT * FROM KhachHang WHERE Ten LIKE ?";
+    private static final String GET_BY_EMAIL = "SELECT * FROM KhachHang WHERE Email = ?";
 
-    static String connectionString = "jdbc:sqlserver://LAPTOP-4K0UOUJE\\MSSQLSERVER02;databaseName=QuanLyDatPhongKhachSan;user=sa;password=123;trustServerCertificate=true";
-    static String getAll = "select * from KhachHang";
-    static String createKH = "insert into KhachHang (ID, Ten, NgaySinh, GioiTinh, Tuoi, CCCD, SDT, Email, MatKhau) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    static String updateKH = "UPDATE KhachHang SET Ten = ?, NgaySinh = ?, GioiTinh = ?, Tuoi = ?, CCCD = ?, SDT = ?, Email = ?, MatKhau = ? WHERE ID = ?";
-    static String deleteKH = "delete from KhachHang where ID = ? ";
-    static String searchKH = "select * from KhachHang where Ten like ? or Tuoi like ?";
+    // Khởi tạo database
+    static {
+        initializeDatabase();
+    }
+    
+    private static void initializeDatabase() {
+        try (Connection con = getConnection();
+             Statement stmt = con.createStatement()) {
+            stmt.execute(CREATE_TABLE);
+            LOGGER.info("Database initialized");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Database initialization failed", e);
+        }
+    }
 
-    public static ArrayList<KhachHang> getAllKH() {
-        ArrayList<KhachHang> khachhangs = new ArrayList<>();
+    private static Connection getConnection() throws SQLException {
         try {
-            Connection con = DriverManager.getConnection(connectionString);
-            PreparedStatement stm = con.prepareStatement(getAll);
-            ResultSet rs = stm.executeQuery();
-            // Tu rs tra ve ArrayList
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "SQLite driver missing", e);
+        }
+        return DriverManager.getConnection(CONNECTION_STRING);
+    }
+    
+    private static void closeResources(Connection con, PreparedStatement stmt, ResultSet rs) {
+        try {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Error closing resources", e);
+        }
+    }
+
+    // =================== CRUD OPERATIONS =================== //
+    
+    // Thêm khách hàng mới (ĐÃ XÓA CCCD VÀ TUỔI)
+    public static boolean addKH(String Ten, Date NgaySinh, String GioiTinh, String SDT, String Email, String MatKhau) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            con = getConnection();
+            
+            // Kiểm tra trùng email
+            if (emailExists(Email, con)) {
+                LOGGER.log(Level.INFO, "Email already exists: {0}", Email);
+                return false;
+            }
+            
+            stmt = con.prepareStatement(CREATE_KH);
+            stmt.setString(1, Ten);
+            stmt.setString(2, new SimpleDateFormat("yyyy-MM-dd").format(NgaySinh)); 
+            stmt.setString(3, GioiTinh);
+            stmt.setString(4, SDT);
+            stmt.setString(5, Email);
+            stmt.setString(6, MatKhau);
+            
+            return stmt.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error adding customer", e);
+            return false;
+        } finally {
+            closeResources(con, stmt, null);
+        }
+    }
+
+    // Lấy tất cả khách hàng
+    public static ArrayList<KhachHang> getAllKH() {
+        ArrayList<KhachHang> khachHangs = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            con = getConnection();
+            stmt = con.prepareStatement(GET_ALL);
+            rs = stmt.executeQuery();
+            
             while (rs.next()) {
                 KhachHang kh = new KhachHang();
-                kh.setID(rs.getInt(1));
-                kh.setTen(rs.getString(2));
-                kh.setNgaySinh(rs.getDate(3));
-                kh.setGioiTinh(rs.getString(4));
-                kh.setTuoi(rs.getInt(5));
-                kh.setCCCD(rs.getInt(6));
-                kh.setSĐT(rs.getInt(7));
-                kh.setEmail(rs.getString(8));
-                kh.setMatKhau(rs.getString(9));
-                khachhangs.add(kh);
+                kh.setID(rs.getInt("ID"));
+                kh.setTen(rs.getString("Ten"));
+                kh.setNgaySinh(new Date(rs.getDate("NgaySinh").getTime()));
+                kh.setGioiTinh(rs.getString("GioiTinh"));
+                kh.setSĐT(rs.getString("SDT"));
+                kh.setEmail(rs.getString("Email"));
+                kh.setMatKhau(rs.getString("MatKhau"));
+                khachHangs.add(kh);
             }
-            return khachhangs;
-        } catch (Exception e) {
-            e.printStackTrace();
+            
+            return khachHangs;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving customers", e);
+            return null;
+        } finally {
+            closeResources(con, stmt, rs);
         }
-        return null;
     }
 
-    // Trong KhachHangDAO.java, sửa phương thức addKH:
-    public static boolean addKH(String Ten, Date NgaySinh, String GioiTinh, int Tuoi, int CCCD, int SDT, String Email, String MatKhau) {
+    // Cập nhật thông tin khách hàng
+    public static boolean suaKH(int ID, String Ten, Date NgaySinh, String GioiTinh, String SDT, String Email, String MatKhau) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        
         try {
-            Connection con = DriverManager.getConnection(connectionString);
-            // Bỏ ID vì đó là trường tự động tăng
-            String sql = "insert into KhachHang (Ten, NgaySinh, GioiTinh, Tuoi, CCCD, SDT, Email, MatKhau) values (?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stm = con.prepareStatement(sql);
-
-            stm.setString(1, Ten);
-            stm.setDate(2, new java.sql.Date(NgaySinh.getTime())); // Chuyển đổi đúng cách
-            stm.setString(3, GioiTinh);
-            stm.setInt(4, Tuoi);
-            stm.setInt(5, CCCD);
-            stm.setInt(6, SDT);
-            stm.setString(7, Email);
-            stm.setString(8, MatKhau);
-
-            int row = stm.executeUpdate();
-            return row > 0;
-        } catch (Exception e) {
-            e.printStackTrace(); // In ra lỗi để debug
+            con = getConnection();
+            stmt = con.prepareStatement(UPDATE_KH);
+            
+            stmt.setString(1, Ten);
+            stmt.setString(2, new java.sql.Date(NgaySinh.getTime()).toString());
+            stmt.setString(3, GioiTinh);
+            stmt.setString(4, SDT);
+            stmt.setString(5, Email);
+            stmt.setString(6, MatKhau);
+            stmt.setInt(7, ID);
+            
+            return stmt.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating customer", e);
             return false;
+        } finally {
+            closeResources(con, stmt, null);
         }
     }
 
-    public static boolean suaKH(int ID, String Ten, Date NgaySinh, String GioiTinh, int Tuoi, int CCCD, int SDT, String Email, String MatKhau) {
+    // Xóa khách hàng
+    public static boolean xoaKH(int ID) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        
         try {
-            Connection con = DriverManager.getConnection(connectionString);
-            String sql = "UPDATE KhachHang SET Ten = ?, NgaySinh = ?, GioiTinh = ?, Tuoi = ?, CCCD = ?, SDT = ?, Email = ?, MatKhau = ? WHERE ID = ?";
-            PreparedStatement stm = con.prepareStatement(sql);
-
-            // Thêm dữ liệu vào câu lệnh SQL
-            stm.setString(1, Ten);
-            stm.setDate(2, new java.sql.Date(NgaySinh.getTime()));
-            stm.setString(3, GioiTinh);
-            stm.setInt(4, Tuoi);
-            stm.setInt(5, CCCD);
-            stm.setInt(6, SDT);
-            stm.setString(7, Email);
-            stm.setString(8, MatKhau);
-            stm.setInt(9, ID);
-
-            int row = stm.executeUpdate();
-            return row > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            con = getConnection();
+            stmt = con.prepareStatement(DELETE_KH);
+            stmt.setInt(1, ID);
+            return stmt.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting customer", e);
             return false;
+        } finally {
+            closeResources(con, stmt, null);
         }
     }
 
-    public static boolean xoaSP(int ID) {
+    // Tìm kiếm theo tên (ĐÃ XÓA TÌM THEO TUỔI)
+    public static ArrayList<KhachHang> searchKH(String searchText) {
+        ArrayList<KhachHang> results = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
         try {
-            Connection con = DriverManager.getConnection(connectionString);
-            PreparedStatement stm = con.prepareStatement(deleteKH);
-            //Dien du lieu cho statement
-            stm.setInt(1, ID);
-            int row = stm.executeUpdate();
-            return row > 0;
-        } catch (Exception e) {
+            con = getConnection();
+            stmt = con.prepareStatement(SEARCH_KH);
+            stmt.setString(1, "%" + searchText + "%");
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                KhachHang kh = new KhachHang();
+                kh.setID(rs.getInt("ID"));
+                kh.setTen(rs.getString("Ten"));
+                kh.setNgaySinh(new Date(rs.getDate("NgaySinh").getTime()));
+                kh.setGioiTinh(rs.getString("GioiTinh"));
+                kh.setSĐT(rs.getString("SDT"));
+                kh.setEmail(rs.getString("Email"));
+                kh.setMatKhau(rs.getString("MatKhau"));
+                results.add(kh);
+            }
+            
+            return results;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error searching customers", e);
+            return null;
+        } finally {
+            closeResources(con, stmt, rs);
         }
-        return false;
     }
 
+    // Lấy khách hàng bằng email (cho chức năng đăng nhập)
+    public static KhachHang getByEmail(String email) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = getConnection();
+            stmt = con.prepareStatement(GET_BY_EMAIL);
+            stmt.setString(1, email);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                KhachHang kh = new KhachHang();
+                kh.setID(rs.getInt("ID"));
+                kh.setTen(rs.getString("Ten"));
+
+                // Sửa phần xử lý ngày sinh
+                String ngaySinhStr = rs.getString("NgaySinh");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date ngaySinh = sdf.parse(ngaySinhStr);
+                kh.setNgaySinh(ngaySinh);
+
+                kh.setGioiTinh(rs.getString("GioiTinh"));
+                kh.setSĐT(rs.getString("SDT"));
+                kh.setEmail(rs.getString("Email"));
+                kh.setMatKhau(rs.getString("MatKhau"));
+                return kh;
+            }
+            return null;
+        } catch (SQLException | ParseException e) { // Thêm ParseException
+            LOGGER.log(Level.SEVERE, "Error getting customer by email", e);
+            return null;
+        } finally {
+            closeResources(con, stmt, rs);
+        }
+    }
+
+    // Kiểm tra email tồn tại
+    private static boolean emailExists(String email, Connection con) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            stmt = con.prepareStatement(GET_BY_EMAIL);
+            stmt.setString(1, email);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking email existence", e);
+            return false;
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Error closing resources", e);
+            }
+        }
+    }
 }
