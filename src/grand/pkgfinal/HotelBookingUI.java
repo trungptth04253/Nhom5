@@ -137,7 +137,7 @@ public class HotelBookingUI {
         navPanel.add(socialPanel, BorderLayout.WEST);
         navPanel.add(logoPanel, BorderLayout.CENTER);
         navPanel.add(authPanel, BorderLayout.EAST);
-       
+        
         return navPanel;
 
     }
