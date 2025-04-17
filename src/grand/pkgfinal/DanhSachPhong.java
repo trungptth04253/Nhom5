@@ -1,5 +1,8 @@
 package grand.pkgfinal;
 
+import Form.LoginSign;
+import Models.KhachHang;
+import Utils.UserSession;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -20,6 +23,7 @@ public class DanhSachPhong extends JFrame {
 
     public DanhSachPhong() {
         super("Danh sách phòng khách sạn");
+        checkLoginStatus();
         initializeUI();
         connectDB();
         loadRooms();
@@ -27,6 +31,17 @@ public class DanhSachPhong extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+    }
+
+    private void checkLoginStatus() {
+        if (UserSession.getCurrentUser() == null) {
+            JOptionPane.showMessageDialog(this,
+                "Vui lòng đăng nhập để tiếp tục",
+                "Yêu cầu đăng nhập",
+                JOptionPane.WARNING_MESSAGE);
+            this.dispose();
+            new LoginSign().setVisible(true);
+        }
     }
 
     private void connectDB() {
@@ -78,7 +93,14 @@ public class DanhSachPhong extends JFrame {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
-        add(mainPanel);
+        JButton btnBack = new JButton("Quay lại trang chủ");
+        btnBack.addActionListener(e -> {
+            this.dispose();
+            new HotelBookingUI().showFrame();
+        });
+        headerPanel.add(btnBack);
+
+            add(mainPanel);
     }
     
     public void reloadRooms() {
@@ -119,6 +141,7 @@ public class DanhSachPhong extends JFrame {
             new EmptyBorder(20, 20, 20, 20))
         );
         card.setMaximumSize(new Dimension(1140, 250));
+        
         // Panel hình ảnh
         JPanel imagePanel = new JPanel();
         imagePanel.setPreferredSize(new Dimension(300, 200));
@@ -167,10 +190,20 @@ public class DanhSachPhong extends JFrame {
             btnDatPhong.setBackground(DISABLED_COLOR);
             btnDatPhong.setText("ĐÃ ĐẶT");
         } else {
-            // Add ActionListener for booking
             btnDatPhong.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    // Kiểm tra đăng nhập
+                    if (UserSession.getCurrentUser() == null) {
+                        JOptionPane.showMessageDialog(
+                            DanhSachPhong.this,
+                            "Vui lòng đăng nhập để đặt phòng!",
+                            "Yêu cầu đăng nhập",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                        return;
+                    }
+                    
                     datphong bookingForm = new datphong(DanhSachPhong.this, connection, room);
                     bookingForm.setVisible(true);
                 }
@@ -178,19 +211,35 @@ public class DanhSachPhong extends JFrame {
         }
 
         // Hiệu ứng hover
-        btnDatPhong.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                if(btnDatPhong.isEnabled()) {
-                    btnDatPhong.setBackground(MAIN_COLOR.brighter());
+    btnDatPhong.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Kiểm tra đăng nhập
+            if (UserSession.getCurrentUser() == null) {
+                // Hiển thị thông báo và mở form đăng nhập khi click OK
+                int response = JOptionPane.showConfirmDialog(
+                    DanhSachPhong.this,
+                    "Vui lòng đăng nhập để đặt phòng!\nBấm OK để chuyển đến trang đăng nhập",
+                    "Yêu cầu đăng nhập",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+                );
+
+                if (response == JOptionPane.OK_OPTION) {
+                    // Tạo và hiển thị form đăng nhập
+                    SwingUtilities.invokeLater(() -> {
+                        LoginSign loginForm = new LoginSign();
+                        loginForm.setVisible(true);
+                    });
                 }
+                return;
             }
-            
-            public void mouseExited(MouseEvent e) {
-                if(btnDatPhong.isEnabled()) {
-                    btnDatPhong.setBackground(MAIN_COLOR);
-                }
-            }
-        });
+
+            // Tiếp tục xử lý đặt phòng nếu đã đăng nhập
+            datphong bookingForm = new datphong(DanhSachPhong.this, connection, room);
+            bookingForm.setVisible(true);
+        }
+    });
 
         // Thêm components
         infoPanel.add(lblSoPhong);
@@ -251,7 +300,7 @@ public class DanhSachPhong extends JFrame {
         public String getLoaiPhong() { return loaiPhong; }
         public double getGiaPhong() { return giaPhong; }
         public String getTrangThai() { return trangThai; }
-        public int getId() { return id; }  // Fixed this method
+        public int getId() { return id; }
     }
 
     public static void main(String[] args) {

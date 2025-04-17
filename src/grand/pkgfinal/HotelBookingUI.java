@@ -1,6 +1,7 @@
 package grand.pkgfinal;
 
 import Form.LoginSign;
+import Utils.UserSession;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 class RoundedButton extends JButton {
-
     public RoundedButton(String text) {
         super(text);
         setContentAreaFilled(false);
@@ -39,7 +39,8 @@ class RoundedButton extends JButton {
     }
 }
 
-public class HotelBookingUI {
+public class HotelBookingUI extends JFrame {
+    private JFrame mainFrame;
 
     static {
         try {
@@ -51,14 +52,16 @@ public class HotelBookingUI {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    private static JFrame mainFrame;
 
-    public static void main(String[] args) {
+    public HotelBookingUI() {
+        initialize();
+    }
 
+    private void initialize() {
         System.out.println("Khởi động ứng dụng đặt phòng khách sạn...");
-        JFrame frame = new JFrame("Hệ Thống Đặt Phòng Khách Sạn");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(1200, 800));
+        mainFrame = new JFrame("Hệ Thống Đặt Phòng Khách Sạn");
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setPreferredSize(new Dimension(1200, 800));
 
         // Main panel với scroll
         JPanel mainPanel = new JPanel();
@@ -67,10 +70,10 @@ public class HotelBookingUI {
 
         JScrollPane scrollPane = new JScrollPane(mainPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        mainFrame.add(scrollPane, BorderLayout.CENTER);
 
-        // Thêm các thành phần vào mainPanel và TRUYỀN FRAME
-        mainPanel.add(createNavPanel(frame)); // Truyền frame vào createNavPanel
+        // Thêm các thành phần vào mainPanel
+        mainPanel.add(createNavPanel(mainFrame));
         mainPanel.add(createBannerSection());
         mainPanel.add(createActionButtons());
         mainPanel.add(createSearchSection());
@@ -78,20 +81,16 @@ public class HotelBookingUI {
         mainPanel.add(createServiceSection());
         mainPanel.add(createFooter());
 
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        mainFrame = frame;
-
+        mainFrame.pack();
+        mainFrame.setLocationRelativeTo(null);
     }
 
-    public static JFrame getMainFrame() {
-        return mainFrame;
+    public void showFrame() {
+        mainFrame.setVisible(true);
     }
 
-    private static void openServiceFrame(String serviceType) {
-        JFrame mainFrame = HotelBookingUI.getMainFrame();
-        mainFrame.setVisible(false); // Ẩn frame chính
+    private void openServiceFrame(String serviceType) {
+        mainFrame.setVisible(false);
 
         switch (serviceType) {
             case "Dịch vụ":
@@ -107,7 +106,7 @@ public class HotelBookingUI {
     }
 
     // ========== CÁC PHƯƠNG THỨC TẠO COMPONENT ==========
-    private static JPanel createNavPanel(JFrame mainFrame) {
+    private JPanel createNavPanel(JFrame mainFrame) {
         JPanel navPanel = new JPanel(new BorderLayout());
         navPanel.setPreferredSize(new Dimension(1200, 80));
         navPanel.setBackground(new Color(240, 240, 240));
@@ -133,16 +132,23 @@ public class HotelBookingUI {
         JPanel authPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         authPanel.setBackground(new Color(240, 240, 240));
 
+        // Thêm nút đăng nhập/đăng ký
+        JButton btnLogin = new JButton("Đăng nhập");
+        btnLogin.addActionListener(e -> {
+            mainFrame.dispose();
+            new LoginSign().setVisible(true);
+        });
+        authPanel.add(btnLogin);
+
         // ===== GẮN CÁC PHẦN VÀO NAV PANEL =====
         navPanel.add(socialPanel, BorderLayout.WEST);
         navPanel.add(logoPanel, BorderLayout.CENTER);
         navPanel.add(authPanel, BorderLayout.EAST);
         
         return navPanel;
-
     }
 
-    private static JPanel createBannerSection() {
+    private JPanel createBannerSection() {
         JPanel panel = new JPanel(new GridLayout(1, 2, 15, 0));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
 
@@ -152,7 +158,7 @@ public class HotelBookingUI {
         return panel;
     }
 
-    private static JPanel createBannerCard(String imgPath, String title, String subtitle) {
+    private JPanel createBannerCard(String imgPath, String title, String subtitle) {
         JPanel card = new JPanel(new BorderLayout());
         JLabel imgLabel = createIconLabel(imgPath, 500, 250);
 
@@ -178,7 +184,7 @@ public class HotelBookingUI {
         return card;
     }
 
-    private static JPanel createSearchSection() {
+    private JPanel createSearchSection() {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
@@ -198,50 +204,81 @@ public class HotelBookingUI {
         return panel;
     }
 
-    private static JPanel createActionButtons() {
-    JPanel panel = new JPanel();
-    panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
+    private JPanel createActionButtons() {
+       JPanel panel = new JPanel();
+       panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
 
-    RoundedButton btnMenu = new RoundedButton("MENU");
-    customizeButton(btnMenu, Color.GRAY);
-    // Thêm ActionListener cho nút MENU
-    btnMenu.addActionListener(e -> {
-        // Lấy frame chính
-        JFrame mainFrame = HotelBookingUI.getMainFrame();
-        // Ẩn frame chính
-        mainFrame.setVisible(false);
-        // Mở giao diện Menu và truyền frame chính để có thể quay lại
-        new Menu(mainFrame);
-    });
+       // Nút Menu
+       RoundedButton btnMenu = new RoundedButton("MENU");
+       customizeButton(btnMenu, Color.GRAY);
+       btnMenu.addActionListener(e -> {
+           mainFrame.setVisible(false);
+           new Menu(mainFrame);
+       });
 
-    RoundedButton btnBook = new RoundedButton("ĐẶT PHÒNG");
-    customizeButton(btnBook, new Color(240, 194, 57));
-    btnBook.addActionListener(e -> showBookingDialog(null));
+       // Nút Đặt phòng (CORE FUNCTION)
+       RoundedButton btnBook = new RoundedButton("ĐẶT PHÒNG");
+       customizeButton(btnBook, new Color(240, 194, 57));
+       btnBook.addActionListener(e -> {
+           // Kiểm tra trạng thái đăng nhập
+           if (UserSession.getCurrentUser() == null) {
+               int choice = JOptionPane.showConfirmDialog(
+                   mainFrame,
+                   "Bạn cần đăng nhập để đặt phòng! Đăng nhập ngay?",
+                   "Yêu cầu đăng nhập",
+                   JOptionPane.YES_NO_OPTION,
+                   JOptionPane.QUESTION_MESSAGE
+               );
 
-    RoundedButton btnMyBooking = new RoundedButton("MY BOOKING");
-    customizeButton(btnMyBooking, Color.GRAY);
+               if (choice == JOptionPane.YES_OPTION) {
+                   mainFrame.dispose();
+                   new LoginSign().setVisible(true);
+               }
+           } else {
+               mainFrame.dispose();
+               new DanhSachPhong().setVisible(true);
+           }
+       });
+
+       // Nút My Booking
+       RoundedButton btnMyBooking = new RoundedButton("MY BOOKING");
+       customizeButton(btnMyBooking, Color.GRAY);
+       btnMyBooking.addActionListener(e -> {
+           if (UserSession.getCurrentUser() == null) {
+               JOptionPane.showMessageDialog(mainFrame,
+                   "Vui lòng đăng nhập để xem đặt phòng của bạn",
+                   "Yêu cầu đăng nhập",
+                   JOptionPane.WARNING_MESSAGE);
+           } else {
+               // Triển khai logic xem lịch sử đặt phòng
+               JOptionPane.showMessageDialog(mainFrame,
+                   "Hiển thị danh sách đặt phòng của bạn...",
+                   "Lịch sử đặt phòng",
+                   JOptionPane.INFORMATION_MESSAGE);
+           }
+       });
 
     panel.add(btnMenu);
     panel.add(Box.createHorizontalStrut(15));
     panel.add(btnBook);
     panel.add(Box.createHorizontalStrut(15));
     panel.add(btnMyBooking);
+    
     return panel;
 }
-
-    private static JPanel createHotelListings() {
+    private JPanel createHotelListings() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 150, 40, 150));
 
-        // Kết nối CSDL và lấy 2 phòng đầu tiên
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:sqlserver://KEANDANHSIEUPHA:1433;"
                 + "databaseName=SOF2042_FINAL_TEST;"
                 + "user=sa;"
                 + "password=123;"
-                + "trustServerCertificate=true"); PreparedStatement pstmt = conn.prepareStatement(
-                        "SELECT TOP 2 * FROM Phong WHERE ID IN (1,2) ORDER BY ID")) {
+                + "trustServerCertificate=true"); 
+             PreparedStatement pstmt = conn.prepareStatement(
+                "SELECT TOP 2 * FROM Phong WHERE ID IN (1,2) ORDER BY ID")) {
 
             ResultSet rs = pstmt.executeQuery();
 
@@ -249,7 +286,7 @@ public class HotelBookingUI {
                 panel.add(createHotelItem(
                         rs.getString("LoaiPhong"),
                         String.format("%,.0f VND/đêm", rs.getDouble("GiaPhong")),
-                        "/hotel" + rs.getInt("ID") + ".jpg" // Giả sử ảnh đặt tên theo ID
+                        "/hotel" + rs.getInt("ID") + ".jpg"
                 ));
                 panel.add(Box.createVerticalStrut(20));
             }
@@ -264,7 +301,7 @@ public class HotelBookingUI {
         return panel;
     }
 
-    private static JPanel createHotelItem(String name, String price, String imgPath) {
+    private JPanel createHotelItem(String name, String price, String imgPath) {
         JPanel panel = new JPanel(new BorderLayout(20, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
@@ -291,6 +328,7 @@ public class HotelBookingUI {
 
         RoundedButton bookBtn = new RoundedButton("ĐẶT NGAY");
         customizeButton(bookBtn, new Color(50, 168, 82));
+        bookBtn.addActionListener(e -> showBookingDialog(name));
 
         infoPanel.add(nameLabel);
         infoPanel.add(Box.createVerticalStrut(10));
@@ -304,7 +342,7 @@ public class HotelBookingUI {
         return panel;
     }
 
-    private static JPanel createServiceSection() {
+    private JPanel createServiceSection() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 50, 50));
@@ -318,7 +356,7 @@ public class HotelBookingUI {
         JPanel grid = new JPanel(new GridLayout(1, 3, 20, 20));
         grid.setMaximumSize(new Dimension(1000, 400));
 
-        grid.add(createServiceCard("/spa.jpg", "Dịch vụ ", "Massage thư giãn"));
+        grid.add(createServiceCard("/spa.jpg", "Dịch vụ", "Massage thư giãn"));
         grid.add(createServiceCard("/promo.jpg", "Ưu đãi", "Giảm giá 30%"));
         grid.add(createServiceCard("/combo.jpg", "Combo", "Phòng + Ăn sáng"));
 
@@ -326,7 +364,7 @@ public class HotelBookingUI {
         return panel;
     }
 
-    private static JPanel createServiceCard(String imgPath, String title, String desc) {
+    private JPanel createServiceCard(String imgPath, String title, String desc) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -335,7 +373,6 @@ public class HotelBookingUI {
         );
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Thêm sự kiện click
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -343,7 +380,6 @@ public class HotelBookingUI {
             }
         });
 
-        // Phần còn lại của method giữ nguyên
         JLabel imgLabel = createIconLabel(imgPath, 280, 160);
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         card.add(imgLabel);
@@ -360,7 +396,7 @@ public class HotelBookingUI {
         return card;
     }
 
-    private static JPanel createFooter() {
+    private JPanel createFooter() {
         JPanel panel = new JPanel();
         panel.setBackground(new Color(50, 50, 50));
         panel.setPreferredSize(new Dimension(1200, 100));
@@ -373,8 +409,7 @@ public class HotelBookingUI {
         return panel;
     }
 
-    // ========== TIỆN ÍCH ==========
-    static JLabel createIconLabel(String path, int width, int height) {
+    private JLabel createIconLabel(String path, int width, int height) {
         try (InputStream imgStream = HotelBookingUI.class.getResourceAsStream(path)) {
             if (imgStream == null) {
                 return createErrorLabel(width, height);
@@ -388,7 +423,7 @@ public class HotelBookingUI {
         }
     }
 
-    private static JLabel createErrorLabel(int width, int height) {
+    private JLabel createErrorLabel(int width, int height) {
         JLabel label = new JLabel("[ẢNH LỖI]");
         label.setPreferredSize(new Dimension(width, height));
         label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -397,15 +432,15 @@ public class HotelBookingUI {
         return label;
     }
 
-    private static void customizeButton(JButton button, Color bgColor) {
+    private void customizeButton(JButton button, Color bgColor) {
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
         button.setPreferredSize(new Dimension(150, 50));
         button.setFont(new Font("Arial", Font.BOLD, 16));
     }
 
-    private static void showBookingDialog(JFrame parent) {
-        JDialog dialog = new JDialog(parent, "Đặt phòng", true);
+    private void showBookingDialog(String roomType) {
+        JDialog dialog = new JDialog(mainFrame, "Đặt phòng", true);
         dialog.setSize(400, 300);
         dialog.setLayout(new BorderLayout());
 
@@ -413,7 +448,11 @@ public class HotelBookingUI {
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         formPanel.add(new JLabel("Loại phòng:"));
-        formPanel.add(new JComboBox<>(new String[]{"Phòng Đơn", "Phòng Đôi", "Suite"}));
+        JComboBox<String> roomCombo = new JComboBox<>(new String[]{"Phòng Đơn", "Phòng Đôi", "Suite"});
+        if (roomType != null) {
+            roomCombo.setSelectedItem(roomType);
+        }
+        formPanel.add(roomCombo);
 
         formPanel.add(new JLabel("Ngày nhận phòng:"));
         formPanel.add(new JTextField());
@@ -425,12 +464,21 @@ public class HotelBookingUI {
         formPanel.add(new JComboBox<>(new String[]{"1", "2", "3", "4"}));
 
         JButton confirmButton = new JButton("Xác nhận");
-        confirmButton.addActionListener(e -> dialog.dispose());
+        confirmButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(dialog, "Đặt phòng thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            dialog.dispose();
+        });
 
         dialog.add(formPanel, BorderLayout.CENTER);
         dialog.add(confirmButton, BorderLayout.SOUTH);
-        dialog.setLocationRelativeTo(parent);
+        dialog.setLocationRelativeTo(mainFrame);
         dialog.setVisible(true);
     }
-    
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            HotelBookingUI hotelUI = new HotelBookingUI();
+            hotelUI.showFrame();
+        });
+    }
 }

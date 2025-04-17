@@ -1,28 +1,21 @@
 package Form;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import grand.pkgfinal.HotelBookingUI;
+import DAOS.KhachHangDAO;
+import Models.KhachHang;
+import Utils.UserSession;
+import java.awt.*;
+import java.awt.event.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.*;
 import java.util.regex.Pattern;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import DAOS.KhachHangDAO;
-import Models.KhachHang;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
-public class LoginSign extends javax.swing.JFrame {
+public class LoginSign extends JFrame {
     
     private JPanel pnlLogin;
     private JPanel pnlSignUp;
@@ -45,7 +38,6 @@ public class LoginSign extends javax.swing.JFrame {
     private JButton btnSignUp;
     private JLabel lblLogin;
     
-    // Thêm các biến màu sắc để dễ quản lý
     private final Color PRIMARY_COLOR = new Color(41, 128, 185);
     private final Color SECONDARY_COLOR = new Color(52, 152, 219);
     private final Color BACKGROUND_COLOR = new Color(236, 240, 241);
@@ -62,44 +54,34 @@ public class LoginSign extends javax.swing.JFrame {
     public LoginSign() {
         initComponents();
         this.setLocationRelativeTo(null);
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH); // Hiển thị toàn màn hình khi khởi động
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
     private void initComponents() {
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Đăng nhập / Đăng ký");
-        setMinimumSize(new Dimension(800, 600)); // Đặt kích thước tối thiểu
-        setResizable(true); // Cho phép thay đổi kích thước
+        setMinimumSize(new Dimension(800, 600));
         getContentPane().setLayout(new BorderLayout());
         
-        // Initialize panels
         pnlLogin = createLoginPanel();
         pnlSignUp = createSignUpPanel();
         
-        // Sử dụng JPanel container với CardLayout
-        JPanel cardPanel = new JPanel(new java.awt.CardLayout());
+        JPanel cardPanel = new JPanel(new CardLayout());
         cardPanel.add(pnlLogin, "login");
         cardPanel.add(pnlSignUp, "signup");
         
-        // Thêm panel vào center của BorderLayout để nó có thể co giãn
         getContentPane().add(cardPanel, BorderLayout.CENTER);
         
-        // Show login panel initially
-        ((java.awt.CardLayout) cardPanel.getLayout()).show(cardPanel, "login");
-        
-        pack();
+        ((CardLayout) cardPanel.getLayout()).show(cardPanel, "login");
     }
     
     private JPanel createLoginPanel() {
-        // Tạo panel chính sử dụng BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
         
-        // Panel trung tâm sử dụng GridBagLayout để căn chỉnh các thành phần
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(BACKGROUND_COLOR);
         
-        // Panel con chứa form đăng nhập
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(Color.WHITE);
@@ -126,7 +108,6 @@ public class LoginSign extends javax.swing.JFrame {
         txtUsername = new JTextField();
         txtUsername.setFont(REGULAR_FONT);
         txtUsername.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        txtUsername.setPreferredSize(new Dimension(300, 35));
         txtUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(txtUsername);
         formPanel.add(Box.createVerticalStrut(15));
@@ -142,7 +123,6 @@ public class LoginSign extends javax.swing.JFrame {
         txtPassword = new JPasswordField();
         txtPassword.setFont(REGULAR_FONT);
         txtPassword.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        txtPassword.setPreferredSize(new Dimension(300, 35));
         txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(txtPassword);
         formPanel.add(Box.createVerticalStrut(10));
@@ -150,15 +130,11 @@ public class LoginSign extends javax.swing.JFrame {
         // Hiển thị mật khẩu
         JCheckBox cbShowPassword = new JCheckBox("Hiển thị mật khẩu");
         cbShowPassword.setFont(SMALL_FONT);
-        cbShowPassword.setForeground(TEXT_COLOR);
         cbShowPassword.setBackground(Color.WHITE);
         cbShowPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
-        cbShowPassword.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                txtPassword.setEchoChar(cbShowPassword.isSelected() ? (char) 0 : '•');
-            }
-        });
+        cbShowPassword.addActionListener(e -> 
+            txtPassword.setEchoChar(cbShowPassword.isSelected() ? (char) 0 : '•')
+        );
         formPanel.add(cbShowPassword);
         formPanel.add(Box.createVerticalStrut(20));
         
@@ -168,19 +144,13 @@ public class LoginSign extends javax.swing.JFrame {
         btnLogin.setForeground(Color.WHITE);
         btnLogin.setBackground(PRIMARY_COLOR);
         btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLogin.setFocusPainted(false);
         btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
         btnLogin.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        btnLogin.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleLogin();
-            }
-        });
+        btnLogin.addActionListener(e -> handleLogin());
         formPanel.add(btnLogin);
         formPanel.add(Box.createVerticalStrut(20));
         
-        // Panel cho quên mật khẩu và đăng ký
+        // Panel bottom
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
         bottomPanel.setBackground(Color.WHITE);
@@ -191,8 +161,8 @@ public class LoginSign extends javax.swing.JFrame {
         lblForgotPassword.setForeground(SECONDARY_COLOR);
         lblForgotPassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lblForgotPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblForgotPassword.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
+        lblForgotPassword.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
                 handleForgotPassword();
             }
         });
@@ -213,10 +183,10 @@ public class LoginSign extends javax.swing.JFrame {
         lblSignUp.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblSignUp.setForeground(PRIMARY_COLOR);
         lblSignUp.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblSignUp.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                CardLayout cl = (CardLayout)(mainPanel.getParent().getLayout());
-                cl.show(mainPanel.getParent(), "signup");
+        lblSignUp.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                CardLayout cl = (CardLayout)(pnlLogin.getParent().getLayout());
+                cl.show(pnlLogin.getParent(), "signup");
             }
         });
         signupPanel.add(lblSignUp);
@@ -224,7 +194,6 @@ public class LoginSign extends javax.swing.JFrame {
         bottomPanel.add(signupPanel);
         formPanel.add(bottomPanel);
         
-        // Thêm form vào panel trung tâm
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -233,27 +202,20 @@ public class LoginSign extends javax.swing.JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         centerPanel.add(formPanel, gbc);
         
-        // Thêm panel trung tâm vào main panel
         mainPanel.add(centerPanel, BorderLayout.CENTER);
-        
         return mainPanel;
     }
     
     private JPanel createSignUpPanel() {
-        // Tạo panel chính với BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
         
-        // Tạo một JScrollPane để cuộn nếu cần
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
-        // Panel trung tâm sử dụng GridBagLayout để căn chỉnh
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(BACKGROUND_COLOR);
         
-        // Panel form đăng ký
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBackground(Color.WHITE);
@@ -284,7 +246,6 @@ public class LoginSign extends javax.swing.JFrame {
         dateChooser.setFont(REGULAR_FONT);
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        dateChooser.setPreferredSize(new Dimension(300, 35));
         dateChooser.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(dateChooser);
         formPanel.add(Box.createVerticalStrut(15));
@@ -341,13 +302,10 @@ public class LoginSign extends javax.swing.JFrame {
         cbShowPass.setFont(SMALL_FONT);
         cbShowPass.setBackground(Color.WHITE);
         cbShowPass.setAlignmentX(Component.LEFT_ALIGNMENT);
-        cbShowPass.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean show = cbShowPass.isSelected();
-                txtPasswordSignUp.setEchoChar(show ? (char) 0 : '•');
-                txtConfirmPassword.setEchoChar(show ? (char) 0 : '•');
-            }
+        cbShowPass.addActionListener(e -> {
+            boolean show = cbShowPass.isSelected();
+            txtPasswordSignUp.setEchoChar(show ? (char) 0 : '•');
+            txtConfirmPassword.setEchoChar(show ? (char) 0 : '•');
         });
         formPanel.add(cbShowPass);
         formPanel.add(Box.createVerticalStrut(20));
@@ -358,15 +316,9 @@ public class LoginSign extends javax.swing.JFrame {
         btnSignUp.setForeground(Color.WHITE);
         btnSignUp.setBackground(PRIMARY_COLOR);
         btnSignUp.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnSignUp.setFocusPainted(false);
         btnSignUp.setAlignmentX(Component.LEFT_ALIGNMENT);
         btnSignUp.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        btnSignUp.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSignUp();
-            }
-        });
+        btnSignUp.addActionListener(e -> handleSignUp());
         formPanel.add(btnSignUp);
         formPanel.add(Box.createVerticalStrut(20));
         
@@ -384,17 +336,16 @@ public class LoginSign extends javax.swing.JFrame {
         lblLogin.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblLogin.setForeground(PRIMARY_COLOR);
         lblLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblLogin.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                CardLayout cl = (CardLayout)(mainPanel.getParent().getLayout());
-                cl.show(mainPanel.getParent(), "login");
+        lblLogin.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                CardLayout cl = (CardLayout)(pnlSignUp.getParent().getLayout());
+                cl.show(pnlSignUp.getParent(), "login");
             }
         });
         loginPanel.add(lblLogin);
         
         formPanel.add(loginPanel);
         
-        // Thêm form vào panel trung tâm với GridBagConstraints
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -403,16 +354,12 @@ public class LoginSign extends javax.swing.JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         centerPanel.add(formPanel, gbc);
         
-        // Thêm centerPanel vào scrollPane
         scrollPane.setViewportView(centerPanel);
-        
-        // Thêm scrollPane vào mainPanel
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
         return mainPanel;
     }
     
-    // Phương thức tiện ích để thêm các trường vào form
     private void addFormField(JPanel panel, String label, JTextField textField) {
         JLabel lblTitle = new JLabel(label);
         lblTitle.setFont(HEADER_FONT);
@@ -423,7 +370,6 @@ public class LoginSign extends javax.swing.JFrame {
         
         textField.setFont(REGULAR_FONT);
         textField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        textField.setPreferredSize(new Dimension(300, 35));
         textField.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(textField);
         panel.add(Box.createVerticalStrut(15));
@@ -433,42 +379,45 @@ public class LoginSign extends javax.swing.JFrame {
         String email = txtUsername.getText().trim();
         String password = new String(txtPassword.getPassword());
         
-        // Validate inputs
         if (email.isEmpty() || password.isEmpty()) {
             showError("Vui lòng nhập đầy đủ thông tin");
             return;
         }
         
-        // Validate email format
         if (!isValidEmail(email)) {
             showError("Email không hợp lệ");
             return;
         }
         
-        // Get user by email
         KhachHang user = KhachHangDAO.getByEmail(email);
         if (user == null) {
             showError("Email không tồn tại trong hệ thống");
             return;
         }
         
-        // Verify password
         String hashedPassword = hashPassword(password);
         if (!user.getMatKhau().equals(hashedPassword)) {
             showError("Mật khẩu không chính xác");
             return;
         }
         
-        // Login successful
+        // Set user session
+        UserSession.setCurrentUser(user);
+        
         JOptionPane.showMessageDialog(this, 
                 "Đăng nhập thành công!\nChào mừng, " + user.getTen(), 
                 "Thành công", 
                 JOptionPane.INFORMATION_MESSAGE);
-        // TODO: Navigate to main application screen
+        
+        // Đóng form đăng nhập và mở giao diện chính
+        this.dispose();
+        SwingUtilities.invokeLater(() -> {
+            HotelBookingUI hotelUI = new HotelBookingUI();
+            hotelUI.showFrame();
+        });
     }
     
     private void handleSignUp() {
-        // Get form data
         String name = txtName.getText().trim();
         Date birthDate = dateChooser.getDate();
         String gender = rbMale.isSelected() ? "Nam" : "Nữ";
@@ -477,43 +426,32 @@ public class LoginSign extends javax.swing.JFrame {
         String password = new String(txtPasswordSignUp.getPassword());
         String confirmPassword = new String(txtConfirmPassword.getPassword());
         
-        // Validate inputs
         if (name.isEmpty() || birthDate == null || phone.isEmpty() || email.isEmpty() || password.isEmpty()) {
             showError("Vui lòng nhập đầy đủ thông tin");
             return;
         }
         
-        // Validate email format
         if (!isValidEmail(email)) {
             showError("Email không hợp lệ");
             return;
         }
         
-        // Validate phone number
         if (!isValidPhone(phone)) {
             showError("Số điện thoại không hợp lệ");
             return;
         }
         
-        // Validate password matching
         if (!password.equals(confirmPassword)) {
             showError("Mật khẩu nhập lại không khớp");
             return;
         }
         
-        // Validate password strength
         if (!isStrongPassword(password)) {
             showError("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số");
             return;
         }
         
-        // Calculate age
-        int age = calculateAge(birthDate);
-        
-        // Hash password
         String hashedPassword = hashPassword(password);
-        
-        // Register user
         boolean success = KhachHangDAO.addKH(name, birthDate, gender, phone, email, hashedPassword);
         
         if (success) {
@@ -522,11 +460,11 @@ public class LoginSign extends javax.swing.JFrame {
                     "Thành công", 
                     JOptionPane.INFORMATION_MESSAGE);
             
-            // Switch to login panel
+            // Chuyển về form đăng nhập
             CardLayout cl = (CardLayout)(pnlSignUp.getParent().getLayout());
             cl.show(pnlSignUp.getParent(), "login");
             
-            // Clear sign up form
+            // Clear form
             txtName.setText("");
             dateChooser.setDate(null);
             rbMale.setSelected(true);
@@ -560,7 +498,6 @@ public class LoginSign extends javax.swing.JFrame {
             return;
         }
         
-        // In a real application, you would send a reset password email
         JOptionPane.showMessageDialog(this, 
                 "Hướng dẫn đặt lại mật khẩu đã được gửi đến email của bạn.\n" +
                 "Vui lòng kiểm tra hộp thư đến.", 
@@ -568,12 +505,8 @@ public class LoginSign extends javax.swing.JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
     
-    // Phương thức tiện ích để hiển thị thông báo lỗi
     private void showError(String message) {
-        JOptionPane.showMessageDialog(this, 
-                message, 
-                "Lỗi", 
-                JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
     
     private boolean isValidEmail(String email) {
@@ -591,19 +524,6 @@ public class LoginSign extends javax.swing.JFrame {
                Pattern.compile("[A-Z]").matcher(password).find() && 
                Pattern.compile("[a-z]").matcher(password).find() && 
                Pattern.compile("[0-9]").matcher(password).find();
-    }
-    
-    private int calculateAge(Date birthDate) {
-        java.util.Calendar today = java.util.Calendar.getInstance();
-        java.util.Calendar birthCal = java.util.Calendar.getInstance();
-        birthCal.setTime(birthDate);
-        
-        int age = today.get(java.util.Calendar.YEAR) - birthCal.get(java.util.Calendar.YEAR);
-        if (today.get(java.util.Calendar.DAY_OF_YEAR) < birthCal.get(java.util.Calendar.DAY_OF_YEAR)) {
-            age--;
-        }
-        
-        return age;
     }
     
     private String hashPassword(String password) {
@@ -626,21 +546,8 @@ public class LoginSign extends javax.swing.JFrame {
     }
     
     public static void main(String args[]) {
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(LoginSign.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new LoginSign().setVisible(true);
-            }
+        SwingUtilities.invokeLater(() -> {
+            new LoginSign().setVisible(true);
         });
     }
 }
@@ -655,33 +562,27 @@ class JDateChooser extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setBackground(Color.WHITE);
         
-        // Initialize ComboBoxes
         dayComboBox = new JComboBox<>();
         monthComboBox = new JComboBox<>();
         yearComboBox = new JComboBox<>();
         
-        // Populate days
         for (int i = 1; i <= 31; i++) {
             dayComboBox.addItem(String.format("%02d", i));
         }
         
-        // Populate months
         for (int i = 1; i <= 12; i++) {
             monthComboBox.addItem(String.format("%02d", i));
         }
         
-        // Populate years (100 years back from current year)
         int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
         for (int i = currentYear; i >= currentYear - 100; i--) {
             yearComboBox.addItem(String.valueOf(i));
         }
         
-        // Thiết lập UI cho combo boxes
         customizeComboBox(dayComboBox);
         customizeComboBox(monthComboBox);
         customizeComboBox(yearComboBox);
         
-        // Add components to panel with labels
         add(new JLabel("Ngày:"));
         add(Box.createHorizontalStrut(5));
         add(dayComboBox);
@@ -694,7 +595,6 @@ class JDateChooser extends JPanel {
         add(Box.createHorizontalStrut(5));
         add(yearComboBox);
         
-        // Set default date format
         dateFormatString = "dd/MM/yyyy";
     }
     
@@ -714,7 +614,6 @@ class JDateChooser extends JPanel {
             monthComboBox.setFont(font);
             yearComboBox.setFont(font);
             
-            // Set font for all components
             for (Component comp : getComponents()) {
                 comp.setFont(font);
             }
@@ -733,7 +632,7 @@ class JDateChooser extends JPanel {
             
             String dateString = day + "/" + month + "/" + year;
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            sdf.setLenient(false); // Kiểm tra ngày tháng hợp lệ
+            sdf.setLenient(false);
             return sdf.parse(dateString);
         } catch (ParseException e) {
             return null;

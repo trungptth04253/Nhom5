@@ -1,5 +1,6 @@
 package Management;
 
+import Form.LoginSign;
 import grand.pkgfinal.DanhSachPhong;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -13,7 +14,6 @@ import java.nio.file.StandardCopyOption;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
-
 public class Admin extends JFrame {
 
     private JTable table;
@@ -22,10 +22,9 @@ public class Admin extends JFrame {
     private JTextField txtSoPhong, txtLoaiPhong, txtGiaPhong;
     private JLabel lblImage, lblDetailImage, lblDetailSoPhong, lblDetailLoaiPhong, lblDetailGiaPhong;
     private String imagePath = "";
-    private JButton btnServiceMgmt;
 
     public Admin() {
-        super("Quản lý phòng - Admin");
+        super("Quản lý khách sạn - Admin");
         initializeUI();
         connectDB();
         loadData();
@@ -35,31 +34,55 @@ public class Admin extends JFrame {
         setVisible(true);
     }
 
-   private void connectDB() {
-    try {
-        String dbPath = "hotel_booking.db";
-        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+    private void connectDB() {
+        try {
+            String dbPath = "hotel_booking.db";
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS Phong ("
-                    + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + "SoPhong INTEGER NOT NULL UNIQUE, "
-                    + "LoaiPhong TEXT NOT NULL, "
-                    + "GiaPhong REAL NOT NULL, "
-                    + "TrangThai TEXT NOT NULL DEFAULT 'Trống', "
-                    + "HinhAnh TEXT)");
+            try (Statement stmt = connection.createStatement()) {
+                // Tạo bảng Phòng
+                stmt.execute("CREATE TABLE IF NOT EXISTS Phong ("
+                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "SoPhong INTEGER NOT NULL UNIQUE, "
+                        + "LoaiPhong TEXT NOT NULL, "
+                        + "GiaPhong REAL NOT NULL, "
+                        + "TrangThai TEXT NOT NULL DEFAULT 'Trống', "
+                        + "HinhAnh TEXT)");
+                
+                // Tạo bảng Dịch Vụ
+                stmt.execute("CREATE TABLE IF NOT EXISTS DichVu ("
+                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "TenDV TEXT NOT NULL UNIQUE, "
+                        + "MoTa TEXT NOT NULL, "
+                        + "ThoiGian TEXT NOT NULL, "
+                        + "HinhAnh TEXT)");
+                
+                // Tạo bảng Nhân Viên
+                stmt.execute("CREATE TABLE IF NOT EXISTS NhanVien ("
+                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "HoTen TEXT NOT NULL, "
+                        + "ChucVu TEXT NOT NULL, "
+                        + "Luong REAL NOT NULL, "
+                        + "NgayVaoLam TEXT NOT NULL)");
+                
+                // Tạo bảng Khách Hàng
+                stmt.execute("CREATE TABLE IF NOT EXISTS KhachHang ("
+                        + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "HoTen TEXT NOT NULL, "
+                        + "CCCD TEXT UNIQUE, "
+                        + "SDT TEXT NOT NULL, "
+                        + "Email TEXT)");
+            }
+        } catch (SQLException e) {
+            showError("Lỗi kết nối database: " + e.getMessage());
         }
-    } catch (SQLException e) {
-        showError("Lỗi kết nối database: " + e.getMessage());
     }
-}
 
     private void initializeUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Bảng danh sách phòng
-        model = new DefaultTableModel(
-                new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
+        // Bảng danh sách
+        model = new DefaultTableModel(new Object[]{"ID", "Số phòng", "Loại phòng", "Giá phòng"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -77,33 +100,43 @@ public class Admin extends JFrame {
         JButton btnDelete = new JButton("Xóa");
         JButton btnView = new JButton("Xem DS Phòng");
         JButton btnEmployeeMgmt = new JButton("Quản lý NV");
+        JButton btnCustomerMgmt = new JButton("Quản lý KH");
+        JButton btnServiceMgmt = new JButton("Quản lý DV");
+        JButton btnLogout = new JButton("Đăng xuất");
 
+        // Style buttons
+        styleButton(btnAdd, new Color(0, 128, 0)); // Xanh lá
+        styleButton(btnEdit, new Color(0, 0, 255)); // Xanh dương
+        styleButton(btnDelete, new Color(255, 0, 0)); // Đỏ
+        styleButton(btnView, new Color(128, 0, 128)); // Tím
+        styleButton(btnEmployeeMgmt, new Color(255, 165, 0)); // Cam
+        styleButton(btnCustomerMgmt, new Color(0, 191, 255)); // Xanh nhạt
+        styleButton(btnServiceMgmt, new Color(46, 204, 113)); // Xanh lá nhạt
+        styleButton(btnLogout, new Color(128, 128, 128)); // Xám
 
-        styleButton(btnAdd, new Color(0, 128, 0));
-        styleButton(btnEdit, new Color(0, 0, 255));
-        styleButton(btnDelete, new Color(255, 0, 0));
-        styleButton(btnView, new Color(128, 0, 128));
-        styleButton(btnEmployeeMgmt, new Color(255, 165, 0));
-
+        // Thêm sự kiện
         btnAdd.addActionListener(e -> showEditDialog(null));
         btnEdit.addActionListener(e -> editSelected());
         btnDelete.addActionListener(e -> deleteSelected());
         btnView.addActionListener(e -> new DanhSachPhong().setVisible(true));
-        btnEmployeeMgmt.addActionListener(e -> {
-            this.dispose();
-            new EmployeeManagementtt().setVisible(true);
-        });
+        btnEmployeeMgmt.addActionListener(e -> openEmployeeManagement());
+        btnCustomerMgmt.addActionListener(e -> openCustomerManagement());
+        btnServiceMgmt.addActionListener(e -> openServiceManagement());
+        btnLogout.addActionListener(e -> logout());
 
-
+        // Thêm nút vào panel
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnView);
         buttonPanel.add(btnEmployeeMgmt);
-        // Panel chi tiết
+        buttonPanel.add(btnCustomerMgmt);
+        buttonPanel.add(btnServiceMgmt);
+        buttonPanel.add(btnLogout);
+
+        // Panel chi tiết phòng
         JPanel detailPanel = createDetailPanel();
 
-        // Thêm các thành phần vào main panel
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(detailPanel, BorderLayout.EAST);
@@ -113,7 +146,6 @@ public class Admin extends JFrame {
             if (!e.getValueIsAdjusting()) {
                 showRoomDetails();
             }
-
         });
 
         this.add(mainPanel);
@@ -228,7 +260,8 @@ public class Admin extends JFrame {
         model.setRowCount(0);
         String query = "SELECT ID, SoPhong, LoaiPhong, GiaPhong FROM Phong";
 
-        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try (Statement stmt = connection.createStatement(); 
+             ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
                 model.addRow(new Object[]{
@@ -380,39 +413,29 @@ public class Admin extends JFrame {
         }
     }
 
-private void saveRoom(Integer id) {
-    String sql = id == null
-            ? "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh, TrangThai) VALUES (?, ?, ?, ?, ?)"
-            : "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ?, TrangThai = ? WHERE ID = ?";
+    private void saveRoom(Integer id) {
+        String sql = id == null
+                ? "INSERT INTO Phong (SoPhong, LoaiPhong, GiaPhong, HinhAnh, TrangThai) VALUES (?, ?, ?, ?, ?)"
+                : "UPDATE Phong SET SoPhong = ?, LoaiPhong = ?, GiaPhong = ?, HinhAnh = ?, TrangThai = ? WHERE ID = ?";
 
-    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-        pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
-        pstmt.setString(2, txtLoaiPhong.getText());
-        pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
-        pstmt.setString(4, imagePath);
-        // Set default status to "Trống" for new rooms or keep existing status for updates
-        pstmt.setString(5, "Trống");
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, Integer.parseInt(txtSoPhong.getText()));
+            pstmt.setString(2, txtLoaiPhong.getText());
+            pstmt.setDouble(3, Double.parseDouble(txtGiaPhong.getText()));
+            pstmt.setString(4, imagePath);
+            pstmt.setString(5, "Trống");
 
-        if (id != null) {
-            // For updating, we need to get the current status to maintain it
-            try (PreparedStatement checkStmt = connection.prepareStatement("SELECT TrangThai FROM Phong WHERE ID = ?")) {
-                checkStmt.setInt(1, id);
-                ResultSet rs = checkStmt.executeQuery();
-                if (rs.next()) {
-                    // Keep the existing status when updating
-                    pstmt.setString(5, rs.getString("TrangThai"));
-                }
+            if (id != null) {
+                pstmt.setInt(6, id);
             }
-            pstmt.setInt(6, id);
+
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Lưu thành công!");
+
+        } catch (SQLException e) {
+            showError("Lỗi lưu dữ liệu: " + e.getMessage());
         }
-
-        pstmt.executeUpdate();
-        JOptionPane.showMessageDialog(this, "Lưu thành công!");
-
-    } catch (SQLException e) {
-        showError("Lỗi lưu dữ liệu: " + e.getMessage());
     }
-}
 
     private void editSelected() {
         int row = table.getSelectedRow();
@@ -450,6 +473,27 @@ private void saveRoom(Integer id) {
         } else {
             showError("Vui lòng chọn một phòng để xóa");
         }
+    }
+
+    private void openEmployeeManagement() {
+        this.dispose();
+        new EmployeeManagement().setVisible(true);
+    }
+
+    private void openCustomerManagement() {
+        this.dispose();
+        new CustomerManagement().setVisible(true);
+    }
+
+    private void openServiceManagement() {
+        this.dispose();
+        new ServiceManagement().setVisible(true);
+    }
+
+    private void logout() {
+        this.dispose();
+        // Quay lại màn hình đăng nhập
+        new LoginSign().setVisible(true);
     }
 
     private void showError(String message) {
